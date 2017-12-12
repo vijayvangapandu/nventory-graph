@@ -17,14 +17,16 @@ public class Model {
 
 	@GraphId
 	private Long id;
-	private final String name;
-	private final String model;
-	private final String sn;
+	private  String name;
+	private  String model;
+	private  String sn;
 
 	@Relationship(type = "SERVER_WITH", direction = Relationship.UNDIRECTED)
 	private List<Server> servers;
 	
-
+	public Model() {
+		
+	}
 	public Model(String name, String model, String sn) {
 		this.name = name;
 		this.model = model;

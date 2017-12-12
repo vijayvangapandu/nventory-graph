@@ -5,12 +5,12 @@ import java.util.Collection;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.stereotype.Repository;
 
 import ops.inventory.dao.model.movie.Movie;
 
 
-@RepositoryRestResource(collectionResourceRel = "movies", path = "movies")
+@Repository
 public interface MovieRepository extends PagingAndSortingRepository<Movie, Long> {
 
 	Movie findByTitle(@Param("title") String title);

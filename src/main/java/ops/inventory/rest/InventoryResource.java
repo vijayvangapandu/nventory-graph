@@ -15,9 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import ops.inventory.dao.model.Application;
+import ops.inventory.dao.model.Memory;
 import ops.inventory.dao.model.Server;
+import ops.inventory.dao.model.Team;
 import ops.inventory.service.ApplicationService;
+import ops.inventory.service.MemoryService;
 import ops.inventory.service.ServerService;
+import ops.inventory.service.TeamService;
 
 @Path("/v1")
 @Component
@@ -28,11 +32,15 @@ public class InventoryResource {
 	
 	final ServerService serverService;
 	final ApplicationService applicationService;
+	final TeamService teamService;
+	final MemoryService memoryService;
 
 	@Autowired
-	public InventoryResource(ServerService serverService, ApplicationService applicationService) {
+	public InventoryResource(ServerService serverService, ApplicationService applicationService, TeamService teamService, MemoryService memoryService) {
 		this.serverService = serverService;
 		this.applicationService = applicationService;
+		this.teamService = teamService;
+		this.memoryService = memoryService;
 	}
 
 	@GET
@@ -60,17 +68,29 @@ public class InventoryResource {
 	private Server saveServerWithName(String serverName) {
 		Server server = new Server(serverName);
 		server.setCpu("2");
-		server.setRam("4GB");
 		server.setDisk("32GB");
-        
+		
+		Memory memory = memoryService.findByName("Memory");
+		if(memory == null) {
+			memory = new Memory();
+			memory.setName("Memory");
+		}
+		server.allocatedMemory(memory, 4);
+		
 		Application app = applicationService.findByName("PAPI");
 		if(app == null) {
 			app = new Application("PAPI", "PROD");
 		}
 		
+		Team team = teamService.findByName("Singles");
+		if(team == null) {
+			team = new Team("Singles");
+		}
+		team.owns(app);
 		app.nodeOf(server);
 		app = applicationService.saveApplication(app);
-        
+		
+		//teamService.saveApplication(team);
         return server;
         //Actor foundTomHanks = findActorByProperty("name", tomHanks.getName()).iterator().next();
         

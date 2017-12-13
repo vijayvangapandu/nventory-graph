@@ -13,14 +13,13 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@NodeEntity
+@NodeEntity(label="Server")
 public class Server {
 
 	@GraphId
 	private Long id;
 	private String name;
 	private String environment;
-	private String ram;
 	private String disk;
 	private String cpu;
 	private String os;
@@ -28,6 +27,8 @@ public class Server {
 	@Relationship(type = "NODE_OF", direction = Relationship.INCOMING)
 	private List<ApplicationServerLink> appServerLinks = new ArrayList<>();
 	
+	@Relationship(type = "ALLOCATED_MEMORY", direction = Relationship.OUTGOING)
+	private List<AllocatedMemory> allocatedMemory = new ArrayList<>();
 
 	public Server() {
 	}
@@ -52,6 +53,15 @@ public class Server {
 	public void addApplicationServerLink(ApplicationServerLink link) {
 		appServerLinks.add(link);
 	}
+	
+	public AllocatedMemory allocatedMemory(Memory memory, long memoryInGB) {
+        final AllocatedMemory aMemory = new AllocatedMemory(this, memory);
+        aMemory.setMemoryInGB(memoryInGB);
+        allocatedMemory.add(aMemory);
+        memory.addAllocatedMemory(aMemory);
+        return aMemory;
+    }
+
 
 	public String getEnvironment() {
 		return environment;
@@ -59,14 +69,6 @@ public class Server {
 
 	public void setEnvironment(String environment) {
 		this.environment = environment;
-	}
-
-	public String getRam() {
-		return ram;
-	}
-
-	public void setRam(String ram) {
-		this.ram = ram;
 	}
 
 	public String getDisk() {
@@ -107,6 +109,14 @@ public class Server {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public List<AllocatedMemory> getAllocatedMemory() {
+		return allocatedMemory;
+	}
+
+	public void setAllocatedMemory(List<AllocatedMemory> allocatedMemory) {
+		this.allocatedMemory = allocatedMemory;
 	}
 	
 }

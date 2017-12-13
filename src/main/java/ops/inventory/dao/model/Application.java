@@ -73,7 +73,7 @@ public class Application {
 		this.appServerLinks = appServerLinks;
 	}
 	
-	@Relationship(type = "OWNS", direction = "INCOMING")
+	//@Relationship(type = "OWNS", direction = "INCOMING")
 	public Set<Team> getTeams() {
 		return teams;
 	}

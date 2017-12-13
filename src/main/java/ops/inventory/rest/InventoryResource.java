@@ -15,11 +15,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import ops.inventory.dao.model.Application;
+import ops.inventory.dao.model.DiskSpace;
 import ops.inventory.dao.model.Memory;
+import ops.inventory.dao.model.Processor;
 import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.service.ApplicationService;
+import ops.inventory.service.DiskSpaceService;
 import ops.inventory.service.MemoryService;
+import ops.inventory.service.ProcessorService;
 import ops.inventory.service.ServerService;
 import ops.inventory.service.TeamService;
 
@@ -34,13 +38,18 @@ public class InventoryResource {
 	final ApplicationService applicationService;
 	final TeamService teamService;
 	final MemoryService memoryService;
+	final ProcessorService processorService;
+	final DiskSpaceService diskSpaceService;
 
 	@Autowired
-	public InventoryResource(ServerService serverService, ApplicationService applicationService, TeamService teamService, MemoryService memoryService) {
+	public InventoryResource(ServerService serverService, ApplicationService applicationService, TeamService teamService, MemoryService memoryService,
+			ProcessorService processorService, DiskSpaceService diskSpaceService) {
 		this.serverService = serverService;
 		this.applicationService = applicationService;
 		this.teamService = teamService;
 		this.memoryService = memoryService;
+		this.processorService = processorService;
+		this.diskSpaceService = diskSpaceService;
 	}
 
 	@GET
@@ -61,39 +70,68 @@ public class InventoryResource {
 	@GET
 	@Path("/server/save")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Server saveServer(@QueryParam("sname") String sname) {
-		return saveServerWithName(sname);
+	public Server saveServer(@QueryParam("sname") String sname, @QueryParam("aname") String aname) {
+		return saveServerWithName(buildServerSaveRequest(sname, aname));
 	}
 	
-	private Server saveServerWithName(String serverName) {
-		Server server = new Server(serverName);
-		server.setCpu("2");
-		server.setDisk("32GB");
+	private Server saveServerWithName(ServerSaveRequest serverSaveRequest) {
+		Server server = serverService.findByName(serverSaveRequest.getServerName());
+		
+		if(server == null) {
+			server = new Server(serverSaveRequest.getServerName());
+		}
 		
 		Memory memory = memoryService.findByName("Memory");
 		if(memory == null) {
 			memory = new Memory();
 			memory.setName("Memory");
 		}
-		server.allocatedMemory(memory, 4);
+		server.allocatedMemory(memory, serverSaveRequest.getMemoryInGG());
 		
-		Application app = applicationService.findByName("PAPI");
+		Processor processor = processorService.findByName("Processor");
+		if(processor == null) {
+			processor = new Processor();
+			processor.setName("Processor");
+		}
+		server.allocatedCpu(processor, serverSaveRequest.getCpuCores());
+		
+		DiskSpace diskSpace = diskSpaceService.findByName("DiskSpace");
+		if(diskSpace == null) {
+			diskSpace = new DiskSpace();
+			diskSpace.setName("DiskSpace");
+		}
+		server.allocatedDiskSpaces(diskSpace, serverSaveRequest.getDiskSpaceInGB());
+		
+		Application app = applicationService.findByName(serverSaveRequest.getApplicationName());
 		if(app == null) {
-			app = new Application("PAPI", "PROD");
+			app = new Application(serverSaveRequest.getApplicationName(), "PROD");
 		}
 		
-		Team team = teamService.findByName("Singles");
+		Team team = teamService.findByName(serverSaveRequest.getTeamName());
 		if(team == null) {
-			team = new Team("Singles");
+			team = new Team(serverSaveRequest.getTeamName());
 		}
 		team.owns(app);
 		app.nodeOf(server);
 		app = applicationService.saveApplication(app);
 		
-		//teamService.saveApplication(team);
         return server;
-        //Actor foundTomHanks = findActorByProperty("name", tomHanks.getName()).iterator().next();
         
 	}
+	
+	private ServerSaveRequest buildServerSaveRequest(String serverName, String applicationName) {
+		ServerSaveRequest request = new ServerSaveRequest();
+		
+		request.setApplicationName(applicationName);
+		request.setServerName(serverName);
+		request.setCpuCores(2);
+		request.setDiskSpaceInGB(32);
+		request.setMemoryInGG(8);
+		request.setTeamName("Singles");
+		
+		return request;
+	}
+	
+	
 	
 }

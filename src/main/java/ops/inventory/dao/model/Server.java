@@ -20,8 +20,6 @@ public class Server {
 	private Long id;
 	private String name;
 	private String environment;
-	private String disk;
-	private String cpu;
 	private String os;
 
 	@Relationship(type = "NODE_OF", direction = Relationship.INCOMING)
@@ -29,6 +27,12 @@ public class Server {
 	
 	@Relationship(type = "ALLOCATED_MEMORY", direction = Relationship.OUTGOING)
 	private List<AllocatedMemory> allocatedMemory = new ArrayList<>();
+	
+	@Relationship(type = "ALLOCATED_CPU", direction = Relationship.OUTGOING)
+	private List<AllocatedCpu> allocatedCPU = new ArrayList<>();
+	
+	@Relationship(type = "ALLOCATED_DISK", direction = Relationship.OUTGOING)
+	private List<AllocatedDiskSpace> allocatedDiskSpace = new ArrayList<>();
 
 	public Server() {
 	}
@@ -61,6 +65,22 @@ public class Server {
         memory.addAllocatedMemory(aMemory);
         return aMemory;
     }
+	
+	public AllocatedCpu allocatedCpu(Processor processor, int numberOfCores) {
+        final AllocatedCpu aCpu = new AllocatedCpu(this, processor);
+        aCpu.setNumberOfCores(numberOfCores);
+        allocatedCPU.add(aCpu);
+        processor.addAllocatedProcessor(aCpu);
+        return aCpu;
+    }
+	
+	public AllocatedDiskSpace allocatedDiskSpaces(DiskSpace diskSpace, long allocatedSpaceInGB) {
+        final AllocatedDiskSpace aDiskSpace = new AllocatedDiskSpace(this, diskSpace);
+        aDiskSpace.setAllocatedSpaceInGB(allocatedSpaceInGB);
+        allocatedDiskSpace.add(aDiskSpace);
+        diskSpace.addAllocatedDisk(aDiskSpace);
+        return aDiskSpace;
+    }
 
 
 	public String getEnvironment() {
@@ -69,22 +89,6 @@ public class Server {
 
 	public void setEnvironment(String environment) {
 		this.environment = environment;
-	}
-
-	public String getDisk() {
-		return disk;
-	}
-
-	public void setDisk(String disk) {
-		this.disk = disk;
-	}
-
-	public String getCpu() {
-		return cpu;
-	}
-
-	public void setCpu(String cpu) {
-		this.cpu = cpu;
 	}
 
 	public String getOs() {
@@ -117,6 +121,22 @@ public class Server {
 
 	public void setAllocatedMemory(List<AllocatedMemory> allocatedMemory) {
 		this.allocatedMemory = allocatedMemory;
+	}
+
+	public List<AllocatedCpu> getAllocatedCPU() {
+		return allocatedCPU;
+	}
+
+	public void setAllocatedCPU(List<AllocatedCpu> allocatedCPU) {
+		this.allocatedCPU = allocatedCPU;
+	}
+
+	public List<AllocatedDiskSpace> getAllocatedDiskSpace() {
+		return allocatedDiskSpace;
+	}
+
+	public void setAllocatedDiskSpace(List<AllocatedDiskSpace> allocatedDiskSpace) {
+		this.allocatedDiskSpace = allocatedDiskSpace;
 	}
 	
 }

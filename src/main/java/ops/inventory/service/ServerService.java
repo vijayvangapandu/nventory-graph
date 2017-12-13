@@ -60,8 +60,20 @@ public class ServerService {
 	}
 	
 	@Transactional(readOnly = false)
+	public Server  findByName(String name) {
+		System.out.println("finding server with name :" + name);
+		return serverRepository.findByName(name);
+	}
+	
+	@Transactional(readOnly = false)
 	public Server  saveServer(Server server) {
 		System.out.println("Saving server with name :" + server.getName());
 		return serverRepository.save(server);
+	}
+	
+	@Transactional(readOnly = false)
+	public void  deleteServer(long id) {
+		System.out.println("deleting server with id :" + id);
+		serverRepository.delete(id);
 	}
 }

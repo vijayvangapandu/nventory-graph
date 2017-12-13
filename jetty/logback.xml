@@ -2,9 +2,9 @@
 
     <include resource="eh_logback.xml"/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/photo-data-service.log</file>
+        <file>logs/inventory.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/photo-data-service.log.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>logs/inventory.log.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <!-- or whenever the file size reaches 100MB -->
                 <maxFileSize>100MB</maxFileSize>
@@ -21,7 +21,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.eharmony">
+    <logger name="ops.inventory">
         <level value="DEBUG"/>
     </logger>
     

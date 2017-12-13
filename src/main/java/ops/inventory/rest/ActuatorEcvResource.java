@@ -1,15 +1,4 @@
-/*
- * This software is the confidential and proprietary information of
- * eharmony.com and may not be used, reproduced, modified, distributed,
- * publicly displayed or otherwise disclosed without the express written
- * consent of eharmony.com.
- *
- * This software is a work of authorship by eharmony.com and protected by
- * the copyright laws of the United States and foreign jurisdictions.
- *
- * Copyright 2000-2016 eharmony.com, Inc. All rights reserved.
- *
- */
+
 package ops.inventory.rest;
 
 import javax.inject.Inject;
@@ -37,10 +26,6 @@ public class ActuatorEcvResource {
     
     @Inject HealthEndpoint healthEndpoint;
     
-    /**
-     * Returns a simple string result for server status that is consistent with current eHarmony usage.
-     * @return "SERVER UP" or "SERVER DOWN" and appropriate return code
-     */
     @GET
     public Response ecv() {
         Health health = healthEndpoint.invoke();

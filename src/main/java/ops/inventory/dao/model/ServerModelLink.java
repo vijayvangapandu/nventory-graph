@@ -10,26 +10,27 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@RelationshipEntity(type = "ALLOCATED_MEMORY")
-public class AllocatedMemory {
+@RelationshipEntity(type = "MODEL_OF")
+public class ServerModelLink {
 
 	@GraphId
 	private Long id;
-
-	private String memoryInGB;
 
 	@StartNode
 	private Server server;
 
 	@EndNode
-	private Memory memory;
+	private Model model;
+	
+	private String modelName;
 
-	public AllocatedMemory() {
+	public ServerModelLink() {
 	}
 
-	public AllocatedMemory(Server server, Memory memory) {
-		this.memory = memory;
+	public ServerModelLink(Server server, Model model, String modelName) {
+		this.model = model;
 		this.server = server;
+		this.modelName = modelName;
 	}
 
 	public Server getServer() {
@@ -52,20 +53,20 @@ public class AllocatedMemory {
 		this.id=id;
 	}
 
-	public String getMemoryInGB() {
-		return memoryInGB;
+	public Model getModel() {
+		return model;
 	}
 
-	public void setMemoryInGB(String memoryInGB) {
-		this.memoryInGB = memoryInGB;
+	public void setModel(Model model) {
+		this.model = model;
 	}
 
-	public Memory getMemory() {
-		return memory;
+	public String getModelName() {
+		return modelName;
 	}
 
-	public void setMemory(Memory memory) {
-		this.memory = memory;
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
 	}
 	
 }

@@ -19,6 +19,8 @@ public class DiskSpace {
 	@GraphId
 	private Long id;
 	private String name;
+	private String diskType;
+	private int numberOfDisks;
 	
 	@Relationship(type = "ALLOCATED_DISK", direction = Relationship.INCOMING)
 	private Set<AllocatedDiskSpace> allocatedDisk = new HashSet<>();
@@ -58,5 +60,20 @@ public class DiskSpace {
 		this.allocatedDisk = allocatedDisk;
 	}
 
+	public int getNumberOfDisks() {
+		return numberOfDisks;
+	}
+
+	public void setNumberOfDisks(int numberOfDisks) {
+		this.numberOfDisks = numberOfDisks;
+	}
+
+	public String getDiskType() {
+		return diskType;
+	}
+
+	public void setDiskType(String diskType) {
+		this.diskType = diskType;
+	}
     
 }

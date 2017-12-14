@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.service.ApplicationService;
 import ops.inventory.service.DiskSpaceService;
+import ops.inventory.service.InventoryService;
 import ops.inventory.service.MemoryService;
 import ops.inventory.service.ProcessorService;
 import ops.inventory.service.ServerService;
@@ -40,16 +42,19 @@ public class InventoryResource {
 	final MemoryService memoryService;
 	final ProcessorService processorService;
 	final DiskSpaceService diskSpaceService;
+	
+	final InventoryService inventoryService;
 
 	@Autowired
 	public InventoryResource(ServerService serverService, ApplicationService applicationService, TeamService teamService, MemoryService memoryService,
-			ProcessorService processorService, DiskSpaceService diskSpaceService) {
+			ProcessorService processorService, DiskSpaceService diskSpaceService, InventoryService inventoryService) {
 		this.serverService = serverService;
 		this.applicationService = applicationService;
 		this.teamService = teamService;
 		this.memoryService = memoryService;
 		this.processorService = processorService;
 		this.diskSpaceService = diskSpaceService;
+		this.inventoryService = inventoryService;
 	}
 
 	@GET
@@ -70,8 +75,11 @@ public class InventoryResource {
 	@GET
 	@Path("/server/save")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Server saveServer(@QueryParam("sname") String sname, @QueryParam("aname") String aname) {
-		return saveServerWithName(buildServerSaveRequest(sname, aname));
+	public void saveServer(@QueryParam("sname") String sname, @QueryParam("aname") String aname) throws Exception {
+		//return saveServerWithName(buildServerSaveRequest(sname, aname));
+		final String fileName = "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
+		inventoryService.loadDataFromFile();
+				//;saveServerWithName(sname, aname);
 	}
 	
 	private Server saveServerWithName(ServerSaveRequest serverSaveRequest) {
@@ -86,7 +94,7 @@ public class InventoryResource {
 			memory = new Memory();
 			memory.setName("Memory");
 		}
-		server.allocatedMemory(memory, serverSaveRequest.getMemoryInGG());
+		server.allocatedMemory(memory, serverSaveRequest.getMemoryInGB());
 		
 		Processor processor = processorService.findByName("Processor");
 		if(processor == null) {
@@ -104,7 +112,7 @@ public class InventoryResource {
 		
 		Application app = applicationService.findByName(serverSaveRequest.getApplicationName());
 		if(app == null) {
-			app = new Application(serverSaveRequest.getApplicationName(), "PROD");
+			app = new Application(serverSaveRequest.getApplicationName(), getEnvironment(serverSaveRequest));
 		}
 		
 		Team team = teamService.findByName(serverSaveRequest.getTeamName());
@@ -119,14 +127,21 @@ public class InventoryResource {
         
 	}
 	
+	private String getEnvironment(ServerSaveRequest request) {
+		if(StringUtils.isNotBlank(request.getEnvironment())) {
+			return request.getEnvironment();
+		}
+		return "PROD";
+	}
+	
 	private ServerSaveRequest buildServerSaveRequest(String serverName, String applicationName) {
 		ServerSaveRequest request = new ServerSaveRequest();
 		
 		request.setApplicationName(applicationName);
 		request.setServerName(serverName);
-		request.setCpuCores(2);
-		request.setDiskSpaceInGB(32);
-		request.setMemoryInGG(8);
+		request.setCpuCores("2");
+		request.setDiskSpaceInGB("32");
+		request.setMemoryInGB("8");
 		request.setTeamName("Singles");
 		
 		return request;

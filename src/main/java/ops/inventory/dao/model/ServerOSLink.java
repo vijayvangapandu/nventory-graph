@@ -10,26 +10,27 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@RelationshipEntity(type = "ALLOCATED_MEMORY")
-public class AllocatedMemory {
+@RelationshipEntity(type = "INSTALLED_OS")
+public class ServerOSLink {
 
 	@GraphId
 	private Long id;
-
-	private String memoryInGB;
 
 	@StartNode
 	private Server server;
 
 	@EndNode
-	private Memory memory;
+	private OperatingSystem os;
+	
+	private String osName;
 
-	public AllocatedMemory() {
+	public ServerOSLink() {
 	}
 
-	public AllocatedMemory(Server server, Memory memory) {
-		this.memory = memory;
+	public ServerOSLink(Server server, OperatingSystem os, String osName) {
+		this.os = os;
 		this.server = server;
+		this.osName = osName;
 	}
 
 	public Server getServer() {
@@ -52,20 +53,22 @@ public class AllocatedMemory {
 		this.id=id;
 	}
 
-	public String getMemoryInGB() {
-		return memoryInGB;
+	public OperatingSystem getOs() {
+		return os;
 	}
 
-	public void setMemoryInGB(String memoryInGB) {
-		this.memoryInGB = memoryInGB;
+	public void setOs(OperatingSystem os) {
+		this.os = os;
 	}
 
-	public Memory getMemory() {
-		return memory;
+	public String getOsName() {
+		return osName;
 	}
 
-	public void setMemory(Memory memory) {
-		this.memory = memory;
+	public void setOsName(String osName) {
+		this.osName = osName;
 	}
+
+	
 	
 }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ops.inventory.dao.ApplicationRepository;
+import ops.inventory.dao.DepartmentRepository;
 import ops.inventory.dao.DiskSpaceRepository;
 import ops.inventory.dao.MemoryRepository;
 import ops.inventory.dao.ModelRepository;
@@ -21,6 +22,7 @@ import ops.inventory.dao.ProcessorRepository;
 import ops.inventory.dao.ServerRepository;
 import ops.inventory.dao.TeamRepository;
 import ops.inventory.dao.model.Application;
+import ops.inventory.dao.model.Department;
 import ops.inventory.dao.model.DiskSpace;
 import ops.inventory.dao.model.Hardware;
 import ops.inventory.dao.model.Memory;
@@ -52,6 +54,9 @@ public class InventoryService {
 	OperatingSystemRepository osRepository;
 	@Autowired
 	ModelRepository modelRepository;
+	
+	@Autowired
+	private DepartmentRepository departmentRepository;
 
 	@Autowired
 	private ApplicationService applicationService;
@@ -198,6 +203,11 @@ public class InventoryService {
 		return modelRepository.findByName(name);
 	}
 	
+	public Department getDepartment(String name) {
+		return departmentRepository.findByName(name);
+				
+	}
+	
 	public Server saveServer(ServerSaveRequest serverSaveRequest) {
 		Server server = getServer(serverSaveRequest.getServerName());
 		
@@ -242,6 +252,12 @@ public class InventoryService {
 		Team team = getTeam(serverSaveRequest.getTeamName());
 		if(team == null) {
 			team = new Team(serverSaveRequest.getTeamName());
+			Department department = getDepartment("Technology");
+			if(department == null) {
+				department = new Department();
+				department.setName("Technology");
+			}
+			department.teamOf(team);
 		}
 		team.owns(app);
 		app.addServer(server);

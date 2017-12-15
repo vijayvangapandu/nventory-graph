@@ -2,10 +2,9 @@ package ops.inventory.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,11 +20,9 @@ import ops.inventory.dao.OperatingSystemRepository;
 import ops.inventory.dao.ProcessorRepository;
 import ops.inventory.dao.ServerRepository;
 import ops.inventory.dao.TeamRepository;
-import ops.inventory.dao.model.AllocatedCpu;
-import ops.inventory.dao.model.AllocatedDiskSpace;
-import ops.inventory.dao.model.AllocatedMemory;
 import ops.inventory.dao.model.Application;
 import ops.inventory.dao.model.DiskSpace;
+import ops.inventory.dao.model.Hardware;
 import ops.inventory.dao.model.Memory;
 import ops.inventory.dao.model.Model;
 import ops.inventory.dao.model.OperatingSystem;
@@ -33,7 +30,6 @@ import ops.inventory.dao.model.Processor;
 import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.rest.ServerSaveRequest;
-import scala.collection.mutable.HashMap;
 
 @Service
 public class InventoryService {
@@ -90,9 +86,10 @@ public class InventoryService {
 		
 		if(servers != null) {
 			servers.stream().forEach(a -> {
-				List<AllocatedCpu> cpus = a.getAllocatedCPU();
-				if(CollectionUtils.isNotEmpty(cpus)) {
-					logger.info("Allocated CPU {}", cpus.get(0).getNumberOfCores());
+				//List<AllocatedCpu> cpus = a.getAllocatedCPU();
+				Hardware hardware = a.getHardware();
+				if(hardware != null) {
+					logger.info("Allocated CPU {}", hardware.getCpuCores());
 				}
 			});
 		}
@@ -113,51 +110,62 @@ public class InventoryService {
 		}
 		response.setApplicationResources(applicationResources);
 		response.setTeamName(teamName);
+		
+		return calculateAggregates(response);
+	}
+	private  List<ServerResourcesResponse> buildServerResourcesResponse(Application app ) {
+		List<Server> servers = getAllServersByApplication(app.getName(), false);
+		return servers.stream().map( a -> mapToServerResponse(a)).collect(Collectors.toList());
+	}
+	
+	private TeamApplicationsResourcesResponse calculateAggregates(TeamApplicationsResourcesResponse response) {
+		List<ApplicationResourcesResponse> appResourceRes = response.getApplicationResources();
+		appResourceRes = appResourceRes.stream().map(a -> aggregateHardware(a)).map(a -> calculateAggregates(a, response)).collect(Collectors.toList());
+		response.setApplicationResources(appResourceRes);
 		return response;
 	}
 	
-	private  List<ServerResourcesResponse> buildServerResourcesResponse(Application app ) {
-		Map<String, ServerResourcesResponse> responseMap = new java.util.HashMap();
+	private ApplicationResourcesResponse aggregateHardware(ApplicationResourcesResponse arr) {
 		
-		List<AllocatedCpu> allocatedCPUs = serverRepository.getServersCPUByApplication(app.getId());
-		for(AllocatedCpu acpu:  allocatedCPUs) {
-			ServerResourcesResponse serverResource = new ServerResourcesResponse();
-			Server server = acpu.getServer();
-			serverResource.setServerName(server.getName());
-			serverResource.setDatacenter(server.getDataCenter());
-			serverResource.setEnvironment(server.getEnvironment());
-			serverResource.setIpaddress(server.getIpAddress());
-			serverResource.setTotalCores(acpu.getNumberOfCores());
-			responseMap.put(serverResource.getServerName(), serverResource);
-		}
+		List<ServerResourcesResponse> serverRes = arr.getServerResources();
 		
-		List<AllocatedDiskSpace> serverDiskSpaceList = serverRepository.getServersDiskSpaceByApplication(app.getName());
+		serverRes.stream().forEach(a -> {
+			arr.addCPUCores(a.getTotalCores());
+			arr.addDiskSpace(a.getDiskSpaceInGB());
+			arr.addMemory(a.getMemoryInGB());
+		} );
 		
-		for(AllocatedDiskSpace adSpace: serverDiskSpaceList) {
-			String serverName = adSpace.getServer().getName();
-			ServerResourcesResponse sResponse = responseMap.get(serverName);
-			if(sResponse != null) {
-				sResponse.setDiskSpaceInGB(adSpace.getAllocatedSpaceInGB());
-			}
-		}
-		
-		List<AllocatedMemory> serverMemoryList = serverRepository.getServersMemoryByApplication(app.getName());
-		
-		for(AllocatedMemory memory: serverMemoryList) {
-			String serverName = memory.getServer().getName();
-			ServerResourcesResponse sResponse = responseMap.get(serverName);
-			if(sResponse != null) {
-				sResponse.setMemoryInGB(memory.getMemoryInGB());
-			}
-		}
-		
-		return new ArrayList(responseMap.values());
-		
-		
-		
+		return arr;
 		
 	}
 	
+   private ApplicationResourcesResponse calculateAggregates(ApplicationResourcesResponse arr, TeamApplicationsResourcesResponse response) {
+		response.addCPUCores(arr.getTotalCores());
+		response.addDiskSpace(arr.getTotalDiskSpaceInGB());
+		response.addMemory(arr.getTotalMemoryInGB());
+		return arr;
+	}
+	
+	
+	
+	
+	private ServerResourcesResponse mapToServerResponse(Server s) {
+		ServerResourcesResponse response = new ServerResourcesResponse();
+		response.setDatacenter(s.getDataCenter());
+		Hardware hardware = s.getHardware();
+		response.setDiskSpaceInGB(hardware.getDiskSpaceInGB());
+		response.setEnvironment(s.getEnvironment());
+		response.setIpaddress(s.getIpAddress());
+		response.setMemoryInGB(hardware.getMemoryInGB());
+		OperatingSystem os = s.getOperatingSystem();
+		if(os != null) {
+			response.setOperatingSystem(os.getName());
+		}
+		//response.setOperatingSystem(s.getOperatingSystem().getName());
+		response.setServerName(s.getName());
+		response.setTotalCores(hardware.getCpuCores());
+		return response;
+	}
 	public Server getServer(String name) {
 		return serverRepository.findByName(name);
 	}
@@ -203,40 +211,28 @@ public class InventoryService {
 			server.setDataCenter(serverSaveRequest.getDataCenter());
 		}
 		
-		Memory memory = getMemory("Memory");
-		if(memory == null) {
-			memory = new Memory();
+		Hardware hardware = server.getHardware();
+		if(hardware == null) {
+			hardware = new Hardware();
 		}
-		memory.setName("Memory");
-		server.allocatedMemory(memory, serverSaveRequest.getMemoryInGB());
 		
-		Processor processor = getProcessor("Processor");
-		if(processor == null) {
-			processor = new Processor();
-		}
-		processor.setName("Processor");
-		server.allocatedCpu(processor, Float.valueOf(serverSaveRequest.getCpuCores()).intValue());
+		hardware.setCpuCores(Float.valueOf(serverSaveRequest.getCpuCores()).intValue());
+		hardware.setDiskSpaceInGB(serverSaveRequest.getDiskSpaceInGB());
+		//hardware.setDiskType(diskType);
+		hardware.setMemoryInGB(serverSaveRequest.getMemoryInGB());
+		hardware.setName("HARDWARE"+"-"+server.getName());
+		//hardware.setNumberOfDisks(numberOfDisks);
+		server.allocatedHardware(hardware);
+		server.setModel(serverSaveRequest.getModel());
 		
-		DiskSpace diskSpace = getDiskSpace("DiskSpace");
-		if(diskSpace == null) {
-			diskSpace = new DiskSpace();
-		}
-		diskSpace.setName("DiskSpace");
-		server.allocatedDiskSpaces(diskSpace, serverSaveRequest.getDiskSpaceInGB());
+		OperatingSystem os = server.getOperatingSystem();
 		
-		OperatingSystem os = osRepository.findByName("OperatingSystem");
 		if(os == null) {
 			os = new OperatingSystem();
 		}
-		os.setName("OperatingSystem");
-		server.installedOS(os, serverSaveRequest.getOperatingSystem());
 		
-		Model model = modelRepository.findByName("Model");
-		if(model == null) {
-			model = new Model();
-			model.setName("Model");
-		}
-		server.modelOf(model, serverSaveRequest.getModel());
+		os.setName(serverSaveRequest.getOperatingSystem());
+		server.installedOperatingSystem(os);
 		
 		Application app = getApplication(serverSaveRequest.getApplicationName());
 		if(app == null) {
@@ -248,7 +244,7 @@ public class InventoryService {
 			team = new Team(serverSaveRequest.getTeamName());
 		}
 		team.owns(app);
-		app.nodeOf(server);
+		app.addServer(server);
 		app = applicationService.saveApplication(app);
 		
         return server;

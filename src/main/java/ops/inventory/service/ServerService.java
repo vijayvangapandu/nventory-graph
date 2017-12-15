@@ -30,7 +30,7 @@ public class ServerService {
 			nodes.add(map("name", server.getName(), "label", "server"));
 			int target = i;
 			i++;
-			for (ApplicationServerLink role : server.getAppServerLinks()) {
+			/*for (ApplicationServerLink role : server.getAppServerLinks()) {
 				Map<String, Object> actor = map("name", role.getApplication().getName(), "label", "application");
 				int source = nodes.indexOf(actor);
 				if (source == -1) {
@@ -38,7 +38,7 @@ public class ServerService {
 					source = i++;
 				}
 				rels.add(map("source", source, "target", target));
-			}
+			}*/
 		}
 		return map("nodes", nodes, "links", rels);
 	}

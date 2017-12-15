@@ -54,5 +54,20 @@ public class TeamApplicationsResourcesResponse {
 	public void addApplicationResourcesResponse(ApplicationResourcesResponse resp) {
 		applicationResources.add(resp);
 	}
+	
+	public double addMemory(double memory) {
+		totalMemoryInGB += memory;
+		return totalMemoryInGB;
+	}
+	
+	public double addDiskSpace(double diskSpace) {
+		totalDiskSpaceInGB += diskSpace;
+		return totalDiskSpaceInGB;
+	}
+	
+	public int addCPUCores(int cpuCores) {
+		totalCores += cpuCores;
+		return totalCores;
+	}
 
 }

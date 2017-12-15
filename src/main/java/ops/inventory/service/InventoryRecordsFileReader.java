@@ -138,8 +138,10 @@ public class InventoryRecordsFileReader {
 
 	private String getEnvironment(ServerSaveRequest request) {
 		String serverName = request.getServerName();
-		if (serverName.toLowerCase().contains(".prod.") || serverName.toLowerCase().contains(".prd1.")
-				|| serverName.toLowerCase().contains(".prd2.")) {
+		if (serverName.toLowerCase().contains(".prod.") || serverName.toLowerCase().contains(".prd.") ||serverName.toLowerCase().contains(".prd1.")
+				|| serverName.toLowerCase().contains(".prd2.")
+				|| serverName.toLowerCase().contains(".prod1.")
+				|| serverName.toLowerCase().contains(".prod2.")) {
 			return PROD_ENV;
 		}
 

@@ -16,7 +16,7 @@ public class AllocatedMemory {
 	@GraphId
 	private Long id;
 
-	private String memoryInGB;
+	private float memoryInGB;
 
 	@StartNode
 	private Server server;
@@ -52,11 +52,11 @@ public class AllocatedMemory {
 		this.id=id;
 	}
 
-	public String getMemoryInGB() {
+	public float getMemoryInGB() {
 		return memoryInGB;
 	}
 
-	public void setMemoryInGB(String memoryInGB) {
+	public void setMemoryInGB(float memoryInGB) {
 		this.memoryInGB = memoryInGB;
 	}
 

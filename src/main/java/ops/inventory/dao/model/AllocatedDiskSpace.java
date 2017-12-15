@@ -16,7 +16,7 @@ public class AllocatedDiskSpace {
 	@GraphId
 	private Long id;
 
-	private String allocatedSpaceInGB;
+	private float allocatedSpaceInGB;
 
 	@StartNode
 	private Server server;
@@ -53,11 +53,11 @@ public class AllocatedDiskSpace {
 	}
 	
 
-	public String getAllocatedSpaceInGB() {
+	public float getAllocatedSpaceInGB() {
 		return allocatedSpaceInGB;
 	}
 
-	public void setAllocatedSpaceInGB(String allocatedSpaceInGB) {
+	public void setAllocatedSpaceInGB(float allocatedSpaceInGB) {
 		this.allocatedSpaceInGB = allocatedSpaceInGB;
 	}
 

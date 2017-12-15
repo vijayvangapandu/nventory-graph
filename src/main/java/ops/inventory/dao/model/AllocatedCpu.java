@@ -16,7 +16,7 @@ public class AllocatedCpu {
 	@GraphId
 	private Long id;
 
-	private String numberOfCores;
+	private int numberOfCores;
 
 	@StartNode
 	private Server server;
@@ -53,11 +53,11 @@ public class AllocatedCpu {
 	}
 	
 
-	public String getNumberOfCores() {
+	public int getNumberOfCores() {
 		return numberOfCores;
 	}
 
-	public void setNumberOfCores(String numberOfCores) {
+	public void setNumberOfCores(int numberOfCores) {
 		this.numberOfCores = numberOfCores;
 	}
 

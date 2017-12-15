@@ -43,6 +43,15 @@ public class Team {
 		this.id = id;
 	}
 	
+	
+	public Set<Application> getApplications() {
+		return applications;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public void owns(Application application) {
 		applications.add(application);
 		application.getTeams().add(this);

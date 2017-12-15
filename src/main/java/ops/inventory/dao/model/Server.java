@@ -67,7 +67,7 @@ public class Server {
 		appServerLinks.add(link);
 	}
 
-	public AllocatedMemory allocatedMemory(Memory memory, String memoryInGB) {
+	public AllocatedMemory allocatedMemory(Memory memory, float memoryInGB) {
 		final AllocatedMemory aMemory = new AllocatedMemory(this, memory);
 		aMemory.setMemoryInGB(memoryInGB);
 		allocatedMemory.add(aMemory);
@@ -75,7 +75,7 @@ public class Server {
 		return aMemory;
 	}
 
-	public AllocatedCpu allocatedCpu(Processor processor, String numberOfCores) {
+	public AllocatedCpu allocatedCpu(Processor processor, int numberOfCores) {
 		final AllocatedCpu aCpu = new AllocatedCpu(this, processor);
 		aCpu.setNumberOfCores(numberOfCores);
 		allocatedCPU.add(aCpu);
@@ -83,7 +83,7 @@ public class Server {
 		return aCpu;
 	}
 
-	public AllocatedDiskSpace allocatedDiskSpaces(DiskSpace diskSpace, String allocatedSpaceInGB) {
+	public AllocatedDiskSpace allocatedDiskSpaces(DiskSpace diskSpace, float allocatedSpaceInGB) {
 		final AllocatedDiskSpace aDiskSpace = new AllocatedDiskSpace(this, diskSpace);
 		aDiskSpace.setAllocatedSpaceInGB(allocatedSpaceInGB);
 		allocatedDiskSpace.add(aDiskSpace);

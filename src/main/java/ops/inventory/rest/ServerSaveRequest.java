@@ -3,9 +3,9 @@ package ops.inventory.rest;
 public class ServerSaveRequest {
 
 	private String serverName;
-	private String cpuCores;
-	private String memoryInGB;
-	private String diskSpaceInGB;
+	private float cpuCores;
+	private float memoryInGB;
+	private float diskSpaceInGB;
 	private String applicationName;
 	private String teamName;
 	private String operatingSystem;
@@ -79,31 +79,30 @@ public class ServerSaveRequest {
 	public void setDataCenter(String dataCenter) {
 		this.dataCenter = dataCenter;
 	}
-	public String getCpuCores() {
-		return cpuCores;
-	}
-	public void setCpuCores(String cpuCores) {
-		this.cpuCores = cpuCores;
-	}
-	public String getMemoryInGB() {
-		return memoryInGB;
-	}
-	public void setMemoryInGB(String memoryInGB) {
-		this.memoryInGB = memoryInGB;
-	}
-	public String getDiskSpaceInGB() {
-		return diskSpaceInGB;
-	}
-	public void setDiskSpaceInGB(String diskSpaceInGB) {
-		this.diskSpaceInGB = diskSpaceInGB;
-	}
+	
 	public String getKernalRelease() {
 		return kernalRelease;
 	}
 	public void setKernalRelease(String kernalRelease) {
 		this.kernalRelease = kernalRelease;
 	}
-	
-	
+	public float getCpuCores() {
+		return cpuCores;
+	}
+	public void setCpuCores(float cpuCores) {
+		this.cpuCores = cpuCores;
+	}
+	public float getMemoryInGB() {
+		return memoryInGB;
+	}
+	public void setMemoryInGB(float memoryInGB) {
+		this.memoryInGB = memoryInGB;
+	}
+	public float getDiskSpaceInGB() {
+		return diskSpaceInGB;
+	}
+	public void setDiskSpaceInGB(float diskSpaceInGB) {
+		this.diskSpaceInGB = diskSpaceInGB;
+	}
 	
 }

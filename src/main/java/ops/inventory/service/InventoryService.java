@@ -1,8 +1,15 @@
 package ops.inventory.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +21,9 @@ import ops.inventory.dao.OperatingSystemRepository;
 import ops.inventory.dao.ProcessorRepository;
 import ops.inventory.dao.ServerRepository;
 import ops.inventory.dao.TeamRepository;
+import ops.inventory.dao.model.AllocatedCpu;
+import ops.inventory.dao.model.AllocatedDiskSpace;
+import ops.inventory.dao.model.AllocatedMemory;
 import ops.inventory.dao.model.Application;
 import ops.inventory.dao.model.DiskSpace;
 import ops.inventory.dao.model.Memory;
@@ -23,10 +33,13 @@ import ops.inventory.dao.model.Processor;
 import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.rest.ServerSaveRequest;
+import scala.collection.mutable.HashMap;
 
 @Service
 public class InventoryService {
 
+	private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
+	
 	@Autowired
 	ApplicationRepository appRepository;
 	@Autowired
@@ -49,6 +62,101 @@ public class InventoryService {
 	
 	@Autowired
 	private InventoryRecordsFileReader reader;
+	
+	
+	public List<Team> getAllTeams() {
+		List<Team> teams = new ArrayList<>();
+		Iterable<Team> ite = teamRepository.findAll();
+		if(ite != null) {
+			ite.iterator().forEachRemaining(a-> {
+				teams.add(a);
+			});
+		}
+		return teams;
+	}
+	
+	public List<Application> getAllApplicationsByTeam(String teamName) {
+		Team team = teamRepository.findByName(teamName);
+		if(team != null) {
+			Set<Application> applicationsSet = team.getApplications();
+			return new ArrayList(applicationsSet);
+		}
+		return ListUtils.EMPTY_LIST;
+	}
+	
+	public List<Server> getAllServersByApplication(String applicationName, boolean onlyProd) {
+		
+		List<Server> servers =  serverRepository.getServersForApplication(applicationName);
+		
+		if(servers != null) {
+			servers.stream().forEach(a -> {
+				List<AllocatedCpu> cpus = a.getAllocatedCPU();
+				if(CollectionUtils.isNotEmpty(cpus)) {
+					logger.info("Allocated CPU {}", cpus.get(0).getNumberOfCores());
+				}
+			});
+		}
+		return servers;
+	}
+	
+	public TeamApplicationsResourcesResponse getTeamAppResources(String teamName) {
+		TeamApplicationsResourcesResponse response = new TeamApplicationsResourcesResponse();
+		List<Application> applications = getAllApplicationsByTeam(teamName);
+		List<ApplicationResourcesResponse> applicationResources = new ArrayList<ApplicationResourcesResponse>();
+		
+		for(Application app: applications) {
+			List<ServerResourcesResponse> serverResources = buildServerResourcesResponse(app);
+			ApplicationResourcesResponse appResourceResponse = new ApplicationResourcesResponse();
+			appResourceResponse.setApplicationName(app.getName());
+			appResourceResponse.setServerResources(serverResources);
+			applicationResources.add(appResourceResponse);
+		}
+		response.setApplicationResources(applicationResources);
+		response.setTeamName(teamName);
+		return response;
+	}
+	
+	private  List<ServerResourcesResponse> buildServerResourcesResponse(Application app ) {
+		Map<String, ServerResourcesResponse> responseMap = new java.util.HashMap();
+		
+		List<AllocatedCpu> allocatedCPUs = serverRepository.getServersCPUByApplication(app.getId());
+		for(AllocatedCpu acpu:  allocatedCPUs) {
+			ServerResourcesResponse serverResource = new ServerResourcesResponse();
+			Server server = acpu.getServer();
+			serverResource.setServerName(server.getName());
+			serverResource.setDatacenter(server.getDataCenter());
+			serverResource.setEnvironment(server.getEnvironment());
+			serverResource.setIpaddress(server.getIpAddress());
+			serverResource.setTotalCores(acpu.getNumberOfCores());
+			responseMap.put(serverResource.getServerName(), serverResource);
+		}
+		
+		List<AllocatedDiskSpace> serverDiskSpaceList = serverRepository.getServersDiskSpaceByApplication(app.getName());
+		
+		for(AllocatedDiskSpace adSpace: serverDiskSpaceList) {
+			String serverName = adSpace.getServer().getName();
+			ServerResourcesResponse sResponse = responseMap.get(serverName);
+			if(sResponse != null) {
+				sResponse.setDiskSpaceInGB(adSpace.getAllocatedSpaceInGB());
+			}
+		}
+		
+		List<AllocatedMemory> serverMemoryList = serverRepository.getServersMemoryByApplication(app.getName());
+		
+		for(AllocatedMemory memory: serverMemoryList) {
+			String serverName = memory.getServer().getName();
+			ServerResourcesResponse sResponse = responseMap.get(serverName);
+			if(sResponse != null) {
+				sResponse.setMemoryInGB(memory.getMemoryInGB());
+			}
+		}
+		
+		return new ArrayList(responseMap.values());
+		
+		
+		
+		
+	}
 	
 	public Server getServer(String name) {
 		return serverRepository.findByName(name);
@@ -107,7 +215,7 @@ public class InventoryService {
 			processor = new Processor();
 		}
 		processor.setName("Processor");
-		server.allocatedCpu(processor, serverSaveRequest.getCpuCores());
+		server.allocatedCpu(processor, Float.valueOf(serverSaveRequest.getCpuCores()).intValue());
 		
 		DiskSpace diskSpace = getDiskSpace("DiskSpace");
 		if(diskSpace == null) {
@@ -154,8 +262,8 @@ public class InventoryService {
 		return "PROD";
 	}
 	
-	public void loadDataFromFile() throws Exception {
-		final String fileName = "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
+	public void loadDataFromFile(String fileName) throws Exception {
+		//final String fileName = "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
 		List<ServerSaveRequest> requests = reader.loadDataFromFile(fileName);
 		
 		for(ServerSaveRequest request:  requests) {

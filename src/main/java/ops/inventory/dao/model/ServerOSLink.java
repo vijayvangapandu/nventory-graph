@@ -10,26 +10,27 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@RelationshipEntity(type = "ALLOCATED_DISK")
-public class AllocatedDiskSpace {
+@RelationshipEntity(type = "INSTALLED_OS")
+public class ServerOSLink {
 
 	@GraphId
 	private Long id;
-
-	private float allocatedSpaceInGB;
 
 	@StartNode
 	private Server server;
 
 	@EndNode
-	private DiskSpace diskSpace;
+	private OperatingSystem os;
+	
+	private String osName;
 
-	public AllocatedDiskSpace() {
+	public ServerOSLink() {
 	}
 
-	public AllocatedDiskSpace(Server server, DiskSpace diskSpace) {
-		this.diskSpace = diskSpace;
+	public ServerOSLink(Server server, OperatingSystem os, String osName) {
+		this.os = os;
 		this.server = server;
+		this.osName = osName;
 	}
 
 	public Server getServer() {
@@ -51,23 +52,23 @@ public class AllocatedDiskSpace {
 	public void setId(long id) {
 		this.id=id;
 	}
-	
 
-	public float getAllocatedSpaceInGB() {
-		return allocatedSpaceInGB;
+	public OperatingSystem getOs() {
+		return os;
 	}
 
-	public void setAllocatedSpaceInGB(float allocatedSpaceInGB) {
-		this.allocatedSpaceInGB = allocatedSpaceInGB;
+	public void setOs(OperatingSystem os) {
+		this.os = os;
 	}
 
-	public DiskSpace getDiskSpace() {
-		return diskSpace;
+	public String getOsName() {
+		return osName;
 	}
 
-	public void setDiskSpace(DiskSpace diskSpace) {
-		this.diskSpace = diskSpace;
+	public void setOsName(String osName) {
+		this.osName = osName;
 	}
+
 	
 	
 }

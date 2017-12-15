@@ -1,7 +1,7 @@
 package ops.inventory.dao.model;
 
-
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -10,27 +10,23 @@ import org.neo4j.ogm.annotation.Relationship;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@NodeEntity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@NodeEntity(label="Model")
 public class Model {
 
 	@GraphId
 	private Long id;
-	private  String name;
-	private  String model;
-	private  String sn;
+	private String name;
 
-	@Relationship(type = "SERVER_WITH", direction = Relationship.UNDIRECTED)
-	private List<Server> servers;
-	
+	@Relationship(type = "MODEL_OF", direction = Relationship.INCOMING)
+	private Set<ServerModelLink> models = new HashSet<>();
+
 	public Model() {
-		
+
 	}
+
 	public Model(String name, String model, String sn) {
 		this.name = name;
-		this.model = model;
-		this.sn=sn;
 	}
 
 	public Long getId() {
@@ -45,24 +41,25 @@ public class Model {
 		this.id = id;
 	}
 
-	public List<Server> getServers() {
-		return servers;
-	}
-
-	public void addServer(Server server) {
-		this.servers.add(server);
-	}
-
-	public String getModel() {
-		return model;
-	}
-
-	public String getSn() {
-		return sn;
-	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
+	public void addServerModelLink(ServerModelLink smLink) {
+
+		models.add(smLink);
+	}
+
+	public Set<ServerModelLink> getModels() {
+		return models;
+	}
+
+	public void setModels(Set<ServerModelLink> models) {
+		this.models = models;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 }

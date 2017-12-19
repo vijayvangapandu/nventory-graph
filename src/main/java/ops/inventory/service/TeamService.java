@@ -14,13 +14,11 @@ public class TeamService {
 
 	@Transactional(readOnly = false)
 	public Team  saveApplication(Team team) {
-		System.out.println("Saving team with name :" + team.getName());
 		return teamRepository.save(team);
 	}
 	
 	@Transactional(readOnly = true)
 	public Team  findByName(String name) {
-		System.out.println("finding Team with name :" + name);
 		return teamRepository.findByName(name);
 	}
 }

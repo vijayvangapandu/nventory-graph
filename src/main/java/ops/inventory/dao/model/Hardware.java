@@ -4,6 +4,7 @@ package ops.inventory.dao.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
@@ -103,6 +104,4 @@ public class Hardware {
 		this.diskSpaceInGB = diskSpaceInGB;
 	}
 
-	
-    
 }

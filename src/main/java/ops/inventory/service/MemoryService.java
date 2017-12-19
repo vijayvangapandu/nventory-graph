@@ -14,13 +14,11 @@ public class MemoryService {
 
 	@Transactional(readOnly = false)
 	public Memory  saveApplication(Memory memory) {
-		System.out.println("Saving memory with name :" + memory.getName());
 		return memoryRepository.save(memory);
 	}
 	
 	@Transactional(readOnly = true)
 	public Memory  findByName(String name) {
-		System.out.println("finding Memory with name :" + name);
 		return memoryRepository.findByName(name);
 	}
 }

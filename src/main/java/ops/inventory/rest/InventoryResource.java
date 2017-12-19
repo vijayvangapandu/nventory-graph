@@ -1,6 +1,7 @@
 package ops.inventory.rest;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -20,6 +21,7 @@ import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.service.ApplicationService;
 import ops.inventory.service.DiskSpaceService;
+import ops.inventory.service.HardwareResourceResponse;
 import ops.inventory.service.InventoryService;
 import ops.inventory.service.MemoryService;
 import ops.inventory.service.ProcessorService;
@@ -99,7 +101,6 @@ public class InventoryResource {
 	@Path("/servers/file/{fileName}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public void loadInventoryFromFile(@PathParam("fileName") String fileName) throws Exception {
-		//final String fileName = "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
 		inventoryService.loadDataFromFile(fileName);
 	}
 	
@@ -119,6 +120,14 @@ public class InventoryResource {
 		int updatedCount =  inventoryService.updateApplicationWitCost(appName, cost);
 		logger.info("Total updated records count {}", updatedCount);
 		return updatedCount;
+	}
+	
+	@GET
+	@Path("/hardware")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Set<HardwareResourceResponse> getHardwareProfiles(@QueryParam("appName")  String appName, @QueryParam("teamName") String teamName) {
+		logger.info("Fetching Hardware profiels for team {} and application {}" , teamName, appName);
+		return inventoryService.getAllUniqueHardwareProfiles(teamName, appName);
 	}
 	
 }

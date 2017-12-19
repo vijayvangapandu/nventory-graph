@@ -3,10 +3,10 @@ package ops.inventory.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 import ops.inventory.dao.ApplicationRepository;
 import ops.inventory.dao.DepartmentRepository;
 import ops.inventory.dao.DiskSpaceRepository;
+import ops.inventory.dao.HardwareRepository;
 import ops.inventory.dao.MemoryRepository;
-import ops.inventory.dao.ModelRepository;
 import ops.inventory.dao.OperatingSystemRepository;
 import ops.inventory.dao.ProcessorRepository;
 import ops.inventory.dao.ServerRepository;
@@ -27,7 +27,6 @@ import ops.inventory.dao.model.Department;
 import ops.inventory.dao.model.DiskSpace;
 import ops.inventory.dao.model.Hardware;
 import ops.inventory.dao.model.Memory;
-import ops.inventory.dao.model.Model;
 import ops.inventory.dao.model.OperatingSystem;
 import ops.inventory.dao.model.Processor;
 import ops.inventory.dao.model.Server;
@@ -40,21 +39,22 @@ public class InventoryService {
 	private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
 
 	@Autowired
-	ApplicationRepository appRepository;
+	private ApplicationRepository appRepository;
 	@Autowired
-	DiskSpaceRepository diskSpaceRepository;
+	private DiskSpaceRepository diskSpaceRepository;
 	@Autowired
-	MemoryRepository memoryRepository;
+	private MemoryRepository memoryRepository;
 	@Autowired
-	ProcessorRepository processorRepository;
+	private ProcessorRepository processorRepository;
 	@Autowired
-	ServerRepository serverRepository;
+	private ServerRepository serverRepository;
 	@Autowired
-	TeamRepository teamRepository;
+	private TeamRepository teamRepository;
 	@Autowired
-	OperatingSystemRepository osRepository;
+	private OperatingSystemRepository osRepository;
+
 	@Autowired
-	ModelRepository modelRepository;
+	private HardwareRepository hardwareRepository;
 
 	@Autowired
 	private DepartmentRepository departmentRepository;
@@ -64,6 +64,8 @@ public class InventoryService {
 
 	@Autowired
 	private InventoryRecordsFileReader reader;
+
+	public static final String DEFAULT_DEPT_NAME = "Technology";
 
 	public List<Team> getAllTeams() {
 		List<Team> teams = new ArrayList<>();
@@ -80,9 +82,9 @@ public class InventoryService {
 		Team team = teamRepository.findByName(teamName);
 		if (team != null) {
 			Set<Application> applicationsSet = team.getApplications();
-			return new ArrayList(applicationsSet);
+			return new ArrayList<>(applicationsSet);
 		}
-		return ListUtils.EMPTY_LIST;
+		return new ArrayList<>();
 	}
 
 	public List<Server> getAllServersByApplication(String applicationName, boolean onlyProd) {
@@ -94,7 +96,7 @@ public class InventoryService {
 				// List<AllocatedCpu> cpus = a.getAllocatedCPU();
 				Hardware hardware = a.getHardware();
 				if (hardware != null) {
-					logger.info("Allocated CPU {}", hardware.getCpuCores());
+					logger.debug("Allocated CPU {}", hardware.getCpuCores());
 				}
 			});
 		}
@@ -187,7 +189,7 @@ public class InventoryService {
 		int updatedCount = 0;
 		try {
 			List<Server> servers = serverRepository.getServersForApplication(name);
-			
+
 			if (CollectionUtils.isNotEmpty(servers)) {
 				for (Server s : servers) {
 					s.setCost(cost);
@@ -222,10 +224,6 @@ public class InventoryService {
 		return osRepository.findByName(name);
 	}
 
-	public Model getModel(String name) {
-		return modelRepository.findByName(name);
-	}
-
 	public Department getDepartment(String name) {
 		return departmentRepository.findByName(name);
 
@@ -253,9 +251,9 @@ public class InventoryService {
 		hardware.setCpuCores(Float.valueOf(serverSaveRequest.getCpuCores()).intValue());
 		hardware.setDiskSpaceInGB(serverSaveRequest.getDiskSpaceInGB());
 		// hardware.setDiskType(diskType);
+		// hardware.setNumberOfDisks(numberOfDisks);
 		hardware.setMemoryInGB(serverSaveRequest.getMemoryInGB());
 		hardware.setName("HARDWARE" + "-" + server.getName());
-		// hardware.setNumberOfDisks(numberOfDisks);
 		server.allocatedHardware(hardware);
 		server.setModel(serverSaveRequest.getModel());
 
@@ -276,10 +274,10 @@ public class InventoryService {
 		Team team = getTeam(serverSaveRequest.getTeamName());
 		if (team == null) {
 			team = new Team(serverSaveRequest.getTeamName());
-			Department department = getDepartment("Technology");
+			Department department = getDepartment(DEFAULT_DEPT_NAME);
 			if (department == null) {
 				department = new Department();
-				department.setName("Technology");
+				department.setName(DEFAULT_DEPT_NAME);
 			}
 			department.teamOf(team);
 		}
@@ -299,13 +297,27 @@ public class InventoryService {
 	}
 
 	public void loadDataFromFile(String fileName) throws Exception {
-		// final String fileName =
-		// "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
 		List<ServerSaveRequest> requests = reader.loadDataFromFile(fileName);
 
 		for (ServerSaveRequest request : requests) {
 			saveServer(request);
 		}
+	}
+
+	public Set<HardwareResourceResponse> getAllUniqueHardwareProfiles(String teamName, String appName) {
+		Set<HardwareResourceResponse> hardwareResponse = new TreeSet<>();
+		Iterable<Hardware> ite = hardwareRepository.findAll();
+		if (ite != null) {
+			ite.forEach(a -> {
+				HardwareResourceResponse response = new HardwareResourceResponse();
+				response.setDiskSpaceInGB(Float.valueOf(a.getDiskSpaceInGB()).intValue());
+				response.setMemoryInGB(Float.valueOf(a.getMemoryInGB()).intValue());
+				response.setNumberOfCores(a.getCpuCores());
+				hardwareResponse.add(response);
+			});
+		}
+
+		return hardwareResponse;
 	}
 
 }

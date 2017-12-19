@@ -14,13 +14,11 @@ public class ApplicationService {
 
 	@Transactional(readOnly = false)
 	public Application  saveApplication(Application application) {
-		System.out.println("Saving application with name :" + application.getName());
 		return appRepository.save(application);
 	}
 	
 	@Transactional(readOnly = true)
 	public Application  findByName(String name) {
-		System.out.println("finding application with name :" + name);
 		return appRepository.findByName(name);
 	}
 }

@@ -28,18 +28,6 @@ public class InventoryRecordsFileReader {
 
 	public static final String DATACENTER_1 = "DC1";
 	public static final String DATACENTER_2 = "DC2";
-	/*
-	 * 0 : ServerName 1 : ApplicationName 2 : Team 3 : Model 4 : SerialNumber 5
-	 * : OS 6 : RAM (KB) 7 : vCPU 8 : Gateway 9 : IPAddress 10 : KernelRelease
-	 * 11 : TotalDiskSpace (GB) 12 : HardDisks 0 :
-	 * accountmanager.np.dc1.eharmony.com 1 : AccountManager 2 : Operations 3 :
-	 * VMware Virtual Platform 4 : VMware 5 : CentOS5.5 6 : 1026880.0 7 : 1.0 8
-	 * : 10.9.80.1 9 : 10.9.81.49/23 10 : 2.6.18-194.el5 11 : 21.4 12 : hda 21.4
-	 * GB 0 : accountmanager.prod.dc1.eharmony.com 1 : AccountManager 2 :
-	 * Operations 3 : VMware Virtual Platform 4 : VMware 5 : CentOS5.5 6 :
-	 * 2059580.0 7 : 1.0 8 : 172.18.128.1 9 : 172.18.128.176/21 10 :
-	 * 2.6.18-194.el5 11 : 21.4 12 : hda 21.4 GB
-	 */
 
 	public List<ServerSaveRequest> loadDataFromFile(String fileName) throws Exception {
 		File myFile = new File(FILE_BASE_PATH + fileName);

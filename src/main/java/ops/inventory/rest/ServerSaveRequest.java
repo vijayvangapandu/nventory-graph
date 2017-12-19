@@ -16,6 +16,7 @@ public class ServerSaveRequest {
 	private String ipAddress;
 	private String dataCenter;
 	private String kernalRelease;
+	private float cost;
 	
 	public String getServerName() {
 		return serverName;
@@ -103,6 +104,12 @@ public class ServerSaveRequest {
 	}
 	public void setDiskSpaceInGB(float diskSpaceInGB) {
 		this.diskSpaceInGB = diskSpaceInGB;
+	}
+	public float getCost() {
+		return cost;
+	}
+	public void setCost(float cost) {
+		this.cost = cost;
 	}
 	
 }

@@ -23,6 +23,7 @@ public class Server {
 	private String dataCenter;
 	private String kernalVersion;
 	private String model;
+	private float cost;
 
 	@Relationship(type = "NODE_OF", direction = Relationship.INCOMING)
 	private List<Application> applications = new ArrayList<>();
@@ -146,6 +147,14 @@ public class Server {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public float getCost() {
+		return cost;
+	}
+
+	public void setCost(float cost) {
+		this.cost = cost;
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import ops.inventory.rest.ServerSaveRequest;
 public class InventoryService {
 
 	private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
-	
+
 	@Autowired
 	ApplicationRepository appRepository;
 	@Autowired
@@ -54,59 +55,58 @@ public class InventoryService {
 	OperatingSystemRepository osRepository;
 	@Autowired
 	ModelRepository modelRepository;
-	
+
 	@Autowired
 	private DepartmentRepository departmentRepository;
 
 	@Autowired
 	private ApplicationService applicationService;
-	
+
 	@Autowired
 	private InventoryRecordsFileReader reader;
-	
-	
+
 	public List<Team> getAllTeams() {
 		List<Team> teams = new ArrayList<>();
 		Iterable<Team> ite = teamRepository.findAll();
-		if(ite != null) {
-			ite.iterator().forEachRemaining(a-> {
+		if (ite != null) {
+			ite.iterator().forEachRemaining(a -> {
 				teams.add(a);
 			});
 		}
 		return teams;
 	}
-	
+
 	public List<Application> getAllApplicationsByTeam(String teamName) {
 		Team team = teamRepository.findByName(teamName);
-		if(team != null) {
+		if (team != null) {
 			Set<Application> applicationsSet = team.getApplications();
 			return new ArrayList(applicationsSet);
 		}
 		return ListUtils.EMPTY_LIST;
 	}
-	
+
 	public List<Server> getAllServersByApplication(String applicationName, boolean onlyProd) {
-		
-		List<Server> servers =  serverRepository.getServersForApplication(applicationName);
-		
-		if(servers != null) {
+
+		List<Server> servers = serverRepository.getServersForApplication(applicationName);
+
+		if (servers != null) {
 			servers.stream().forEach(a -> {
-				//List<AllocatedCpu> cpus = a.getAllocatedCPU();
+				// List<AllocatedCpu> cpus = a.getAllocatedCPU();
 				Hardware hardware = a.getHardware();
-				if(hardware != null) {
+				if (hardware != null) {
 					logger.info("Allocated CPU {}", hardware.getCpuCores());
 				}
 			});
 		}
 		return servers;
 	}
-	
+
 	public TeamApplicationsResourcesResponse getTeamAppResources(String teamName) {
 		TeamApplicationsResourcesResponse response = new TeamApplicationsResourcesResponse();
 		List<Application> applications = getAllApplicationsByTeam(teamName);
 		List<ApplicationResourcesResponse> applicationResources = new ArrayList<ApplicationResourcesResponse>();
-		
-		for(Application app: applications) {
+
+		for (Application app : applications) {
 			List<ServerResourcesResponse> serverResources = buildServerResourcesResponse(app);
 			ApplicationResourcesResponse appResourceResponse = new ApplicationResourcesResponse();
 			appResourceResponse.setApplicationName(app.getName());
@@ -115,45 +115,47 @@ public class InventoryService {
 		}
 		response.setApplicationResources(applicationResources);
 		response.setTeamName(teamName);
-		
+
 		return calculateAggregates(response);
 	}
-	private  List<ServerResourcesResponse> buildServerResourcesResponse(Application app ) {
+
+	private List<ServerResourcesResponse> buildServerResourcesResponse(Application app) {
 		List<Server> servers = getAllServersByApplication(app.getName(), false);
-		return servers.stream().map( a -> mapToServerResponse(a)).collect(Collectors.toList());
+		return servers.stream().map(a -> mapToServerResponse(a)).collect(Collectors.toList());
 	}
-	
+
 	private TeamApplicationsResourcesResponse calculateAggregates(TeamApplicationsResourcesResponse response) {
 		List<ApplicationResourcesResponse> appResourceRes = response.getApplicationResources();
-		appResourceRes = appResourceRes.stream().map(a -> aggregateHardware(a)).map(a -> calculateAggregates(a, response)).collect(Collectors.toList());
+		appResourceRes = appResourceRes.stream().map(a -> aggregateHardware(a))
+				.map(a -> calculateAggregates(a, response)).collect(Collectors.toList());
 		response.setApplicationResources(appResourceRes);
 		return response;
 	}
-	
+
 	private ApplicationResourcesResponse aggregateHardware(ApplicationResourcesResponse arr) {
-		
+
 		List<ServerResourcesResponse> serverRes = arr.getServerResources();
-		
+
 		serverRes.stream().forEach(a -> {
 			arr.addCPUCores(a.getTotalCores());
 			arr.addDiskSpace(a.getDiskSpaceInGB());
 			arr.addMemory(a.getMemoryInGB());
-		} );
-		
+			arr.addCost(a.getCost());
+		});
+
 		return arr;
-		
+
 	}
-	
-   private ApplicationResourcesResponse calculateAggregates(ApplicationResourcesResponse arr, TeamApplicationsResourcesResponse response) {
+
+	private ApplicationResourcesResponse calculateAggregates(ApplicationResourcesResponse arr,
+			TeamApplicationsResourcesResponse response) {
 		response.addCPUCores(arr.getTotalCores());
 		response.addDiskSpace(arr.getTotalDiskSpaceInGB());
 		response.addMemory(arr.getTotalMemoryInGB());
+		response.setTotalCost(arr.getTotalCost());
 		return arr;
 	}
-	
-	
-	
-	
+
 	private ServerResourcesResponse mapToServerResponse(Server s) {
 		ServerResourcesResponse response = new ServerResourcesResponse();
 		response.setDatacenter(s.getDataCenter());
@@ -163,20 +165,41 @@ public class InventoryService {
 		response.setIpaddress(s.getIpAddress());
 		response.setMemoryInGB(hardware.getMemoryInGB());
 		OperatingSystem os = s.getOperatingSystem();
-		if(os != null) {
+		if (os != null) {
 			response.setOperatingSystem(os.getName());
 		}
-		//response.setOperatingSystem(s.getOperatingSystem().getName());
+		// response.setOperatingSystem(s.getOperatingSystem().getName());
 		response.setServerName(s.getName());
 		response.setTotalCores(hardware.getCpuCores());
+		response.setCost(s.getCost());
 		return response;
 	}
+
 	public Server getServer(String name) {
 		return serverRepository.findByName(name);
 	}
 
 	public Application getApplication(String name) {
 		return appRepository.findByName(name);
+	}
+
+	public int updateApplicationWitCost(String name, float cost) {
+		int updatedCount = 0;
+		try {
+			List<Server> servers = serverRepository.getServersForApplication(name);
+			
+			if (CollectionUtils.isNotEmpty(servers)) {
+				for (Server s : servers) {
+					s.setCost(cost);
+					serverRepository.save(s);
+					updatedCount++;
+				}
+			}
+
+		} catch (Exception ex) {
+			logger.warn("Exception while updating servers for application {}", name, ex);
+		}
+		return updatedCount;
 	}
 
 	public Team getTeam(String name) {
@@ -202,58 +225,59 @@ public class InventoryService {
 	public Model getModel(String name) {
 		return modelRepository.findByName(name);
 	}
-	
+
 	public Department getDepartment(String name) {
 		return departmentRepository.findByName(name);
-				
+
 	}
-	
+
 	public Server saveServer(ServerSaveRequest serverSaveRequest) {
 		Server server = getServer(serverSaveRequest.getServerName());
-		
-		if(server == null) {
+
+		if (server == null) {
 			server = new Server(serverSaveRequest.getServerName());
 		}
 		server.setEnvironment(getEnvironment(serverSaveRequest));
 		server.setGateway(serverSaveRequest.getGateway());
 		server.setIpAddress(serverSaveRequest.getIpAddress());
-		if(StringUtils.isNotBlank(serverSaveRequest.getDataCenter())) {
+		server.setCost(serverSaveRequest.getCost());
+		if (StringUtils.isNotBlank(serverSaveRequest.getDataCenter())) {
 			server.setDataCenter(serverSaveRequest.getDataCenter());
 		}
-		
+
 		Hardware hardware = server.getHardware();
-		if(hardware == null) {
+		if (hardware == null) {
 			hardware = new Hardware();
 		}
-		
+
 		hardware.setCpuCores(Float.valueOf(serverSaveRequest.getCpuCores()).intValue());
 		hardware.setDiskSpaceInGB(serverSaveRequest.getDiskSpaceInGB());
-		//hardware.setDiskType(diskType);
+		// hardware.setDiskType(diskType);
 		hardware.setMemoryInGB(serverSaveRequest.getMemoryInGB());
-		hardware.setName("HARDWARE"+"-"+server.getName());
-		//hardware.setNumberOfDisks(numberOfDisks);
+		hardware.setName("HARDWARE" + "-" + server.getName());
+		// hardware.setNumberOfDisks(numberOfDisks);
 		server.allocatedHardware(hardware);
 		server.setModel(serverSaveRequest.getModel());
-		
+
 		OperatingSystem os = server.getOperatingSystem();
-		
-		if(os == null) {
+
+		if (os == null) {
 			os = new OperatingSystem();
 		}
-		
+
 		os.setName(serverSaveRequest.getOperatingSystem());
 		server.installedOperatingSystem(os);
-		
+
 		Application app = getApplication(serverSaveRequest.getApplicationName());
-		if(app == null) {
+		if (app == null) {
 			app = new Application(serverSaveRequest.getApplicationName(), getEnvironment(serverSaveRequest));
 		}
-		
+
 		Team team = getTeam(serverSaveRequest.getTeamName());
-		if(team == null) {
+		if (team == null) {
 			team = new Team(serverSaveRequest.getTeamName());
 			Department department = getDepartment("Technology");
-			if(department == null) {
+			if (department == null) {
 				department = new Department();
 				department.setName("Technology");
 			}
@@ -262,23 +286,24 @@ public class InventoryService {
 		team.owns(app);
 		app.addServer(server);
 		app = applicationService.saveApplication(app);
-		
-        return server;
-        
+
+		return server;
+
 	}
-	
+
 	private String getEnvironment(ServerSaveRequest request) {
-		if(StringUtils.isNotBlank(request.getEnvironment())) {
+		if (StringUtils.isNotBlank(request.getEnvironment())) {
 			return request.getEnvironment();
 		}
 		return "PROD";
 	}
-	
+
 	public void loadDataFromFile(String fileName) throws Exception {
-		//final String fileName = "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
+		// final String fileName =
+		// "/Users/vvangapandu/Desktop/inventory-load-2017-Part1-Copy.xlsx";
 		List<ServerSaveRequest> requests = reader.loadDataFromFile(fileName);
-		
-		for(ServerSaveRequest request:  requests) {
+
+		for (ServerSaveRequest request : requests) {
 			saveServer(request);
 		}
 	}

@@ -107,6 +107,9 @@ public class InventoryRecordsFileReader {
 				case 11:
 					request.setDiskSpaceInGB((StringUtils.isNotBlank(value)) ? Float.valueOf(value) : 0);
 					break;
+				case 13:
+					request.setCost((StringUtils.isNotBlank(value)) ? Float.valueOf(value) : 0);
+					break;
 				}
 			}
 			if (!badRow) {

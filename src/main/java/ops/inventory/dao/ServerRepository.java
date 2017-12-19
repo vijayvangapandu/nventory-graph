@@ -14,7 +14,6 @@ import ops.inventory.dao.model.AllocatedMemory;
 import ops.inventory.dao.model.Server;
 
 
-//@RepositoryRestResource(collectionResourceRel = "servers", path = "servers")
 @Repository
 public interface ServerRepository extends PagingAndSortingRepository<Server, Long> {
 
@@ -25,19 +24,18 @@ public interface ServerRepository extends PagingAndSortingRepository<Server, Lon
 	@Query("MATCH (m:Server)<-[r:NODE_OF]-(a:Application) RETURN m,r,a LIMIT {limit}")
 	Collection<Server> graph(@Param("limit") int limit);
 	
-	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server) WHERE a.name = {name} RETURN s ")
-	//@Query("start user=node({userId}) match user-[u:DT_USER_CREATES_EVENT]->(eventnode) WHERE eventnode.status = 1 AND eventnode.updatedDate >= {startDate} return eventnode;")
-	List<Server> getServersForApplication(@Param(value="name") String name);
+	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[ah]-(h) WHERE a.name = {0} RETURN a,r,s,ah,h")
+	List<Server> getServersForApplication(String name);
 	
-	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[m:ALLOCATED_MEMORY]-() WHERE a.name = '{name}' RETURN m ")
-	List<AllocatedMemory> getServersMemoryByApplication(@Param(value="name") String name);
+	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[m:ALLOCATED_MEMORY]-() WHERE a.name = {0} RETURN m ")
+	List<AllocatedMemory> getServersMemoryByApplication( String name);
 	
-	@Query("MATCH (a:Application{id: {param}.id})-[r:NODE_OF]-(s:Server)-[c:ALLOCATED_CPU]-() RETURN c ")
+	@Query("MATCH (a:Application{id: {0}})-[r:NODE_OF]-(s:Server)-[c:ALLOCATED_CPU]-() RETURN c ")
 	//List<AllocatedCpu> getServersCPUByApplication(@Param(value="name") String name);
-	List<AllocatedCpu> getServersCPUByApplication(@Param(value="id") long id);
+	List<AllocatedCpu> getServersCPUByApplication(long id);
 	
-	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[d: ALLOCATED_DISK]-() WHERE a.name = '{name}' RETURN d ")
-	List<AllocatedDiskSpace> getServersDiskSpaceByApplication(@Param(value="name") String name);
+	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[d: ALLOCATED_DISK]-() WHERE a.name = {0} RETURN d ")
+	List<AllocatedDiskSpace> getServersDiskSpaceByApplication(String name);
 	
 }
 

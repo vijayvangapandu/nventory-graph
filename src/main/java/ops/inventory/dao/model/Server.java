@@ -1,9 +1,7 @@
 package ops.inventory.dao.model;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.neo4j.ogm.annotation.GraphId;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -24,24 +22,17 @@ public class Server {
 	private String gateway;
 	private String dataCenter;
 	private String kernalVersion;
+	private String model;
+	private float cost;
 
 	@Relationship(type = "NODE_OF", direction = Relationship.INCOMING)
-	private List<ApplicationServerLink> appServerLinks = new ArrayList<>();
+	private List<Application> applications = new ArrayList<>();
 
-	@Relationship(type = "ALLOCATED_MEMORY", direction = Relationship.OUTGOING)
-	private List<AllocatedMemory> allocatedMemory = new ArrayList<>();
+	@Relationship(type = "ALLOCATED_HARDWARE")
+	private Hardware hardware;
 
-	@Relationship(type = "ALLOCATED_CPU", direction = Relationship.OUTGOING)
-	private List<AllocatedCpu> allocatedCPU = new ArrayList<>();
-
-	@Relationship(type = "ALLOCATED_DISK", direction = Relationship.OUTGOING)
-	private List<AllocatedDiskSpace> allocatedDiskSpace = new ArrayList<>();
-
-	@Relationship(type = "MODEL_OF", direction = Relationship.OUTGOING)
-	private List<ServerModelLink> models = new ArrayList<>();
-
-	@Relationship(type = "INSTALLED_OS", direction = Relationship.OUTGOING)
-	private Set<ServerOSLink> installedOS = new HashSet<>();
+	@Relationship(type = "INSTALLED_OS")
+	private OperatingSystem operatingSystem;
 
 	public Server() {
 	}
@@ -63,46 +54,18 @@ public class Server {
 		this.id = id;
 	}
 
-	public void addApplicationServerLink(ApplicationServerLink link) {
-		appServerLinks.add(link);
+	public void addApplication(Application application) {
+		applications.add(application);
 	}
-
-	public AllocatedMemory allocatedMemory(Memory memory, float memoryInGB) {
-		final AllocatedMemory aMemory = new AllocatedMemory(this, memory);
-		aMemory.setMemoryInGB(memoryInGB);
-		allocatedMemory.add(aMemory);
-		memory.addAllocatedMemory(aMemory);
-		return aMemory;
+	
+	public void allocatedHardware(Hardware hardware) {
+		this.hardware = hardware;
+		hardware.addServer(this);
 	}
-
-	public AllocatedCpu allocatedCpu(Processor processor, int numberOfCores) {
-		final AllocatedCpu aCpu = new AllocatedCpu(this, processor);
-		aCpu.setNumberOfCores(numberOfCores);
-		allocatedCPU.add(aCpu);
-		processor.addAllocatedProcessor(aCpu);
-		return aCpu;
-	}
-
-	public AllocatedDiskSpace allocatedDiskSpaces(DiskSpace diskSpace, float allocatedSpaceInGB) {
-		final AllocatedDiskSpace aDiskSpace = new AllocatedDiskSpace(this, diskSpace);
-		aDiskSpace.setAllocatedSpaceInGB(allocatedSpaceInGB);
-		allocatedDiskSpace.add(aDiskSpace);
-		diskSpace.addAllocatedDisk(aDiskSpace);
-		return aDiskSpace;
-	}
-
-	public ServerModelLink modelOf(Model model, String modelName) {
-		final ServerModelLink smLink = new ServerModelLink(this, model, modelName);
-		models.add(smLink);
-		model.addServerModelLink(smLink);
-		return smLink;
-	}
-
-	public ServerOSLink installedOS(OperatingSystem os, String osName) {
-		final ServerOSLink soLink = new ServerOSLink(this, os, osName);
-		installedOS.add(soLink);
-		os.addInstalledOS(soLink);
-		return soLink;
+	
+	public void installedOperatingSystem(OperatingSystem operatingSystem) {
+		this.operatingSystem = operatingSystem;
+		operatingSystem.addServer(this);
 	}
 
 	public String getEnvironment() {
@@ -113,12 +76,13 @@ public class Server {
 		this.environment = environment;
 	}
 
-	public List<ApplicationServerLink> getAppServerLinks() {
-		return appServerLinks;
+
+	public List<Application> getApplications() {
+		return applications;
 	}
 
-	public void setAppServerLinks(List<ApplicationServerLink> appServerLinks) {
-		this.appServerLinks = appServerLinks;
+	public void setApplications(List<Application> applications) {
+		this.applications = applications;
 	}
 
 	public void setId(Long id) {
@@ -127,30 +91,6 @@ public class Server {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public List<AllocatedMemory> getAllocatedMemory() {
-		return allocatedMemory;
-	}
-
-	public void setAllocatedMemory(List<AllocatedMemory> allocatedMemory) {
-		this.allocatedMemory = allocatedMemory;
-	}
-
-	public List<AllocatedCpu> getAllocatedCPU() {
-		return allocatedCPU;
-	}
-
-	public void setAllocatedCPU(List<AllocatedCpu> allocatedCPU) {
-		this.allocatedCPU = allocatedCPU;
-	}
-
-	public List<AllocatedDiskSpace> getAllocatedDiskSpace() {
-		return allocatedDiskSpace;
-	}
-
-	public void setAllocatedDiskSpace(List<AllocatedDiskSpace> allocatedDiskSpace) {
-		this.allocatedDiskSpace = allocatedDiskSpace;
 	}
 
 	public String getIpAddress() {
@@ -169,22 +109,6 @@ public class Server {
 		this.gateway = gateway;
 	}
 
-	public List<ServerModelLink> getModels() {
-		return models;
-	}
-
-	public void setModels(List<ServerModelLink> models) {
-		this.models = models;
-	}
-
-	public Set<ServerOSLink> getInstalledOS() {
-		return installedOS;
-	}
-
-	public void setInstalledOS(Set<ServerOSLink> installedOS) {
-		this.installedOS = installedOS;
-	}
-
 	public String getDataCenter() {
 		return dataCenter;
 	}
@@ -200,6 +124,37 @@ public class Server {
 	public void setKernalVersion(String kernalVersion) {
 		this.kernalVersion = kernalVersion;
 	}
-	
+
+	public Hardware getHardware() {
+		return hardware;
+	}
+
+	public void setHardware(Hardware hardware) {
+		this.hardware = hardware;
+	}
+
+	public OperatingSystem getOperatingSystem() {
+		return operatingSystem;
+	}
+
+	public void setOperatingSystem(OperatingSystem operatingSystem) {
+		this.operatingSystem = operatingSystem;
+	}
+
+	public String getModel() {
+		return model;
+	}
+
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	public float getCost() {
+		return cost;
+	}
+
+	public void setCost(float cost) {
+		this.cost = cost;
+	}
 
 }

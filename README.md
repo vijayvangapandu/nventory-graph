@@ -37,4 +37,19 @@ ex: http://localhost:7001/nventory/v1/teams/applications/Arrow/servers
 http://localhost:7001/nventory/v1/teams/{teamName}/applications/resources
 Ex: http://localhost:7001/nventory/v1/teams/Platform/applications/resources
 
+### Load data using file
+Path: http://host:port/nventory/v1/servers/file/{fileName}
+Ex: curl -X POST http://localhost:7001/nventory/v1/servers/file/inventory-load-2017-Part1.xlsx
+
+###How to change password on default neo4j instance
+curl -H "Content-Type: application/json" -X POST -d '{"password":"your new password"}' -u neo4j:neo4j http://localhost:7474/user/neo4j/password
+
+### To enable remote connection execute
+dbms.connector.http.address=0.0.0.0:7474
+dbms.connector.https.address=0.0.0.0:7473
+dbms.connector.bolt.address=0.0.0.0:7687
+
+### Update cost
+curl -X POST http://localhost:7001/nventory/v1/applications/Arrow/costByServer/3.5
+
 

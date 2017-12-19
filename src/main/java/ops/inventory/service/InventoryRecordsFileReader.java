@@ -107,6 +107,9 @@ public class InventoryRecordsFileReader {
 				case 11:
 					request.setDiskSpaceInGB((StringUtils.isNotBlank(value)) ? Float.valueOf(value) : 0);
 					break;
+				case 13:
+					request.setCost((StringUtils.isNotBlank(value)) ? Float.valueOf(value) : 0);
+					break;
 				}
 			}
 			if (!badRow) {
@@ -138,8 +141,10 @@ public class InventoryRecordsFileReader {
 
 	private String getEnvironment(ServerSaveRequest request) {
 		String serverName = request.getServerName();
-		if (serverName.toLowerCase().contains(".prod.") || serverName.toLowerCase().contains(".prd1.")
-				|| serverName.toLowerCase().contains(".prd2.")) {
+		if (serverName.toLowerCase().contains(".prod.") || serverName.toLowerCase().contains(".prd.") ||serverName.toLowerCase().contains(".prd1.")
+				|| serverName.toLowerCase().contains(".prd2.")
+				|| serverName.toLowerCase().contains(".prod1.")
+				|| serverName.toLowerCase().contains(".prod2.")) {
 			return PROD_ENV;
 		}
 

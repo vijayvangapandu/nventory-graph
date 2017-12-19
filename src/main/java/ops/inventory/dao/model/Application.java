@@ -26,16 +26,23 @@ public class Application {
 	@Relationship(type = "OWNS", direction = "INCOMING")
 	private Set<Team> teams = new HashSet<>();
 	
-	@Relationship(type = "NODE_OF", direction = Relationship.OUTGOING)
-	private List<ApplicationServerLink> appServerLinks = new ArrayList<>();
+	//@Relationship(type = "NODE_OF", direction = Relationship.OUTGOING)
+	//private List<ApplicationServerLink> appServerLinks = new ArrayList<>();
+	@Relationship(type = "NODE_OF")
+	private List<Server> servers = new ArrayList<>();
 	
-	public ApplicationServerLink nodeOf(Server server) {
+	/*public ApplicationServerLink nodeOf(Server server) {
         final ApplicationServerLink link = new ApplicationServerLink(this, server);
         appServerLinks.add(link);
         server.addApplicationServerLink(link);
         return link;
     }
-
+*/
+	public void addServer(Server server) {
+		servers.add(server);
+		server.addApplication(this);
+	}
+	
 	public Application() {
 		
 	}
@@ -65,14 +72,26 @@ public class Application {
 		this.id = id;
 	}
 
-	public List<ApplicationServerLink> getAppServerLinks() {
-		return appServerLinks;
+	public List<Server> getServers() {
+		return servers;
 	}
 
-	public void setAppServerLinks(List<ApplicationServerLink> appServerLinks) {
-		this.appServerLinks = appServerLinks;
+	public void setServers(List<Server> servers) {
+		this.servers = servers;
 	}
-	
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setEnvironment(String environment) {
+		this.environment = environment;
+	}
+
+	public void setTeams(Set<Team> teams) {
+		this.teams = teams;
+	}
+
 	//@Relationship(type = "OWNS", direction = "INCOMING")
 	public Set<Team> getTeams() {
 		return teams;

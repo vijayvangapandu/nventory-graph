@@ -13,18 +13,22 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@NodeEntity(label="OperatingSystem")
-public class OperatingSystem {
+@NodeEntity(label="Hardware")
+public class Hardware {
 
 	@GraphId
 	private Long id;
 	private String name;
-	private String kernalVersion;
+	private float memoryInGB;
+	private int cpuCores;
+	private float diskSpaceInGB;
+	private String diskType;
+	private int numberOfDisks;
 	
-	@Relationship(type = "INSTALLED_OS", direction = "INCOMING")
+	@Relationship(type = "ALLOCATED_HARDWARE", direction = "INCOMING")
 	private Set<Server> servers = new HashSet<>();
 	
-	public OperatingSystem() {
+	public Hardware() {
 	}
 	
 	public Long getId() {
@@ -51,12 +55,16 @@ public class OperatingSystem {
 		this.name = name;
 	}
 
-	public String getKernalVersion() {
-		return kernalVersion;
+	public int getNumberOfDisks() {
+		return numberOfDisks;
 	}
 
-	public void setKernalVersion(String kernalVersion) {
-		this.kernalVersion = kernalVersion;
+	public void setNumberOfDisks(int numberOfDisks) {
+		this.numberOfDisks = numberOfDisks;
+	}
+
+	public String getDiskType() {
+		return diskType;
 	}
 
 	public Set<Server> getServers() {
@@ -67,4 +75,34 @@ public class OperatingSystem {
 		this.servers = servers;
 	}
 
+	public void setDiskType(String diskType) {
+		this.diskType = diskType;
+	}
+
+	public float getMemoryInGB() {
+		return memoryInGB;
+	}
+
+	public void setMemoryInGB(float memoryInGB) {
+		this.memoryInGB = memoryInGB;
+	}
+
+	public int getCpuCores() {
+		return cpuCores;
+	}
+
+	public void setCpuCores(int cpuCores) {
+		this.cpuCores = cpuCores;
+	}
+
+	public float getDiskSpaceInGB() {
+		return diskSpaceInGB;
+	}
+
+	public void setDiskSpaceInGB(float diskSpaceInGB) {
+		this.diskSpaceInGB = diskSpaceInGB;
+	}
+
+	
+    
 }

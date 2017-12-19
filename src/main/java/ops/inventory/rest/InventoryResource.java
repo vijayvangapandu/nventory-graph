@@ -111,4 +111,14 @@ public class InventoryResource {
 		return inventoryService.getTeamAppResources(teamName);
 	}
 	
+	@POST
+	@Path("/applications/{appName}/costByServer/{cost}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public int updateServerCost(@PathParam("appName")  String appName, @PathParam("cost")  float cost) {
+		logger.info("Updating cost for all servers in given application with name {} and server cost [}" , appName, cost);
+		int updatedCount =  inventoryService.updateApplicationWitCost(appName, cost);
+		logger.info("Total updated records count {}", updatedCount);
+		return updatedCount;
+	}
+	
 }

@@ -8,6 +8,7 @@ public class ApplicationResourcesResponse {
 	private double totalMemoryInGB;
 	private double totalDiskSpaceInGB;
 	private int totalCores;
+	private float totalCost;
 	
 	private List<ServerResourcesResponse> serverResources;
 
@@ -53,5 +54,34 @@ public class ApplicationResourcesResponse {
 	public void addServerResourcesResponse(ServerResourcesResponse resp) {
 		serverResources.add(resp);
 	}
+	
+	public double addMemory(double memory) {
+		totalMemoryInGB += memory;
+		return totalMemoryInGB;
+	}
+	
+	public double addDiskSpace(double diskSpace) {
+		totalDiskSpaceInGB += diskSpace;
+		return totalDiskSpaceInGB;
+	}
+	
+	public int addCPUCores(int cpuCores) {
+		totalCores += cpuCores;
+		return totalCores;
+	}
+
+	public float getTotalCost() {
+		return totalCost;
+	}
+
+	public void setTotalCost(float totalCost) {
+		this.totalCost = totalCost;
+	}
+	
+	public float addCost(double cost) {
+		this.totalCost += cost;
+		return totalCost;
+	}
+	
 	
 }

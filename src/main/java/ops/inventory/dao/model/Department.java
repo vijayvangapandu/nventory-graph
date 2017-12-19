@@ -13,23 +13,20 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
-@NodeEntity(label="Team")
-public class Team {
+@NodeEntity(label="Department")
+public class Department {
 
 	@GraphId
 	private Long id;
 	private String name;
 
-	@Relationship(type = "OWNES")
-	private Set<Application> applications = new HashSet<>();
-	
-	@Relationship(type = "TEAM_OF", direction = "INCOMING")
-	private Set<Department> departments = new HashSet<>();
+	@Relationship(type = "TEAM_OF")
+	private Set<Team> teams = new HashSet<>();
 
-	public Team() {
+	public Department() {
 	}
 	
-	public Team(String name) {
+	public Department(String name) {
 
 		this.name = name;
 	}
@@ -47,20 +44,16 @@ public class Team {
 	}
 	
 	
-	public Set<Application> getApplications() {
-		return applications;
+	public Set<Team> getTeams() {
+		return teams;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public void owns(Application application) {
-		applications.add(application);
-		application.getTeams().add(this);
-	}
-	
-	public void addDepartment(Department department) {
-		departments.add(department);
+	public void teamOf(Team team) {
+		teams.add(team);
+		team.addDepartment(this);
 	}
 }

@@ -8,6 +8,7 @@ public class TeamApplicationsResourcesResponse {
 	private double totalMemoryInGB;
 	private double totalDiskSpaceInGB;
 	private int totalCores;
+	private float totalCost;
 	
 	private List<ApplicationResourcesResponse> applicationResources;
 
@@ -54,5 +55,29 @@ public class TeamApplicationsResourcesResponse {
 	public void addApplicationResourcesResponse(ApplicationResourcesResponse resp) {
 		applicationResources.add(resp);
 	}
+	
+	public double addMemory(double memory) {
+		totalMemoryInGB += memory;
+		return totalMemoryInGB;
+	}
+	
+	public double addDiskSpace(double diskSpace) {
+		totalDiskSpaceInGB += diskSpace;
+		return totalDiskSpaceInGB;
+	}
+	
+	public int addCPUCores(int cpuCores) {
+		totalCores += cpuCores;
+		return totalCores;
+	}
+
+	public float getTotalCost() {
+		return totalCost;
+	}
+
+	public void setTotalCost(float totalCost) {
+		this.totalCost = totalCost;
+	}
+	
 
 }

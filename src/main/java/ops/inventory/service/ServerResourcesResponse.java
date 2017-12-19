@@ -10,6 +10,7 @@ public class ServerResourcesResponse {
 	private String ipaddress;
 	private String environment;
 	private String datacenter;
+	private float cost;
 	public String getServerName() {
 		return serverName;
 	}
@@ -58,7 +59,11 @@ public class ServerResourcesResponse {
 	public void setDatacenter(String datacenter) {
 		this.datacenter = datacenter;
 	}
-	
-	
+	public float getCost() {
+		return cost;
+	}
+	public void setCost(float cost) {
+		this.cost = cost;
+	}
 	
 }

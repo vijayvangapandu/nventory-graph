@@ -15,6 +15,7 @@ Since this is graph based application, all the components are well connected and
 
 
 ## Domain Model:
+```
  Nodes
  
  Department     : Departments in company ex: technology
@@ -31,7 +32,7 @@ Since this is graph based application, all the components are well connected and
  TEAM_OF             : Department to Team association
  OWNES               : Team to application association
  NODE_OF             : Application to Server association
- 
+ ```
 ## Application installation
 This application is springboot application with embedded jetty container, this can be deployed in jetty container. 
 ```
@@ -55,31 +56,45 @@ This application is springboot application with embedded jetty container, this c
 ### API's
 
 #### Get All Teams
+```
 http://host:7001/nventory/v1/teams
 ex: http://localhost:7001/nventory/v1/teams
+```
 ### Get Team by name
+```
 http://host:7001/nventory/v1/teams/{teamName}
 ex: http://localhost:7001/nventory/v1/teams/Platform
+```
 
 #### Get All Applications by team
+```
 http://host:7001/nventory/v1/teams/{teamName}/applications
 ex: http://host:7001/nventory/v1/teams/Platform/applications
+```
 
 #### Get Application by appName
+```
 http://host:7001/nventory/v1/applications/{appName}
 ex: http://host:7001/nventory/v1/applications/Arrow
+```
 
 #### Get All Servers by appName
+```
 http://localhost:7001/nventory/v1/teams/applications/{appName}/servers
 ex: http://localhost:7001/nventory/v1/teams/applications/Arrow/servers
+```
 
 ### Get all resources by team
+```
 http://localhost:7001/nventory/v1/teams/{teamName}/applications/resources
 Ex: http://localhost:7001/nventory/v1/teams/Platform/applications/resources
+```
 
 ### Load data using file
+```
 Path: http://host:port/nventory/v1/servers/file/{fileName}
 Ex: curl -X POST http://localhost:7001/nventory/v1/servers/file/inventory-load-2017-Part1.xlsx
+```
 
 ### How to change password on default neo4j instance
 curl -H "Content-Type: application/json" -X POST -d '{"password":"your new password"}' -u neo4j:neo4j http://localhost:7474/user/neo4j/password

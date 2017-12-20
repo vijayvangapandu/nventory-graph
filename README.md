@@ -97,23 +97,46 @@ Ex: curl -X POST http://localhost:7001/nventory/v1/servers/file/inventory-load-2
 ```
 
 ### How to change password on default neo4j instance
+```
 curl -H "Content-Type: application/json" -X POST -d '{"password":"your new password"}' -u neo4j:neo4j http://localhost:7474/user/neo4j/password
+```
 
 
 ### Update cost
+```
 curl -X POST http://localhost:7001/nventory/v1/applications/Arrow/costByServer/3.5
+```
 
  
 ## Sample Queries
 
+
+### Get Team by name
+```
+Match(n:Team{name:'Front'}) return n
+```
+
+### Get Application by name
+```
+Match(n:Application{name:'Front'}) return n
+```
+
 ### Get Allocated Memory By Application
+```
 Match(n:Application{name:'Arrow'})-[no: NODE_OF]-()-[r: ALLOCATED_HARDWARE]-(h: Hardware) return sum(h.memoryInGB)
+```
 
 ### Get Allocated CPU By Application
+```
 Match(n:Application{name:'Arrow'})-[no: NODE_OF]-()-[r: ALLOCATED_HARDWARE]-(h: Hardware) return sum(h.numberOfCores)
+```
 
 ### Get Allocated DiskSpace By Application
+```
 Match(n:Application{name:'Arrow'})-[no: NODE_OF]-()-[r: ALLOCATED_HARDWARE]-(h: Hardware) return sum(h.allocatedSpaceInGB)
+```
 
 ### Number of allocated processes by application
+```
 Match(a:Application {name: 'Arrow'})-[NODE_OF]-(n:Server)--[r: ALLOCATED_HARDWARE]-(h: Hardware) return a, h
+```

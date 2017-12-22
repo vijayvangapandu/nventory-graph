@@ -14,13 +14,11 @@ public class ProcessorService {
 
 	@Transactional(readOnly = false)
 	public Processor  saveApplication(Processor processor) {
-		System.out.println("Saving processor with name :" + processor.getName());
 		return processorRepository.save(processor);
 	}
 	
 	@Transactional(readOnly = true)
 	public Processor  findByName(String name) {
-		System.out.println("finding processor with name :" + name);
 		return processorRepository.findByName(name);
 	}
 }

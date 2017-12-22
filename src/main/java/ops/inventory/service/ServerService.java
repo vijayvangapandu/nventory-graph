@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ops.inventory.dao.ServerRepository;
-import ops.inventory.dao.model.ApplicationServerLink;
 import ops.inventory.dao.model.Server;
 
 @Service
@@ -28,17 +27,7 @@ public class ServerService {
 		while (result.hasNext()) {
 			Server server = result.next();
 			nodes.add(map("name", server.getName(), "label", "server"));
-			int target = i;
 			i++;
-			/*for (ApplicationServerLink role : server.getAppServerLinks()) {
-				Map<String, Object> actor = map("name", role.getApplication().getName(), "label", "application");
-				int source = nodes.indexOf(actor);
-				if (source == -1) {
-					nodes.add(actor);
-					source = i++;
-				}
-				rels.add(map("source", source, "target", target));
-			}*/
 		}
 		return map("nodes", nodes, "links", rels);
 	}
@@ -53,27 +42,22 @@ public class ServerService {
 	@Transactional(readOnly = true)
 	public Map<String, Object>  graph(int limit) {
 		Collection<Server> result = serverRepository.graph(limit);
-		System.out.println("Result resulting map.." + result != null ? result.size():-2);
 		Map<String, Object> map =  toD3Format(result);
-		System.out.println("Returning resulting map.." + map != null ? map.size():-1);
 		return map;
 	}
 	
 	@Transactional(readOnly = false)
 	public Server  findByName(String name) {
-		System.out.println("finding server with name :" + name);
 		return serverRepository.findByName(name);
 	}
 	
 	@Transactional(readOnly = false)
 	public Server  saveServer(Server server) {
-		System.out.println("Saving server with name :" + server.getName());
 		return serverRepository.save(server);
 	}
 	
 	@Transactional(readOnly = false)
 	public void  deleteServer(long id) {
-		System.out.println("deleting server with id :" + id);
 		serverRepository.delete(id);
 	}
 }

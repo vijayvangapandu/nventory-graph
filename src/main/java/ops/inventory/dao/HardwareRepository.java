@@ -4,10 +4,10 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import ops.inventory.dao.model.Model;
+import ops.inventory.dao.model.Hardware;
 
 
 @Repository
-public interface ModelRepository extends PagingAndSortingRepository<Model, Long> {
-	Model findByName(@Param("name") String name);
+public interface HardwareRepository extends PagingAndSortingRepository<Hardware, Long> {
+	Hardware findByName(@Param("name") String name);
 }

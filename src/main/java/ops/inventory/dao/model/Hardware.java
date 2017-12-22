@@ -103,6 +103,4 @@ public class Hardware {
 		this.diskSpaceInGB = diskSpaceInGB;
 	}
 
-	
-    
 }

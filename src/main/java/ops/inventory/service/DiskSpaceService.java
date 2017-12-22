@@ -14,13 +14,11 @@ public class DiskSpaceService {
 
 	@Transactional(readOnly = false)
 	public DiskSpace  saveApplication(DiskSpace diskSpace) {
-		System.out.println("Saving diskSpace with name :" + diskSpace.getName());
 		return diskSpaceRepository.save(diskSpace);
 	}
 	
 	@Transactional(readOnly = true)
 	public DiskSpace  findByName(String name) {
-		System.out.println("finding diskSpace with name :" + name);
 		return diskSpaceRepository.findByName(name);
 	}
 }

@@ -74,9 +74,9 @@ public class ApplicationResourcesResponse {
 		return totalCost;
 	}
 
-	public void setTotalCost(float totalCost) {
+	/*public void setTotalCost(float totalCost) {
 		this.totalCost = totalCost;
-	}
+	}*/
 	
 	public float addCost(double cost) {
 		this.totalCost += cost;

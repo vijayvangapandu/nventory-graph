@@ -75,8 +75,12 @@ public class TeamApplicationsResourcesResponse {
 		return totalCost;
 	}
 
-	public void setTotalCost(float totalCost) {
+	/*public void setTotalCost(float totalCost) {
 		this.totalCost = totalCost;
+	}*/
+	
+	public void addCost(float cost) {
+		this.totalCost+= cost;
 	}
 	
 

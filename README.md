@@ -86,8 +86,14 @@ ex: http://localhost:7001/nventory/v1/teams/applications/Arrow/servers
 
 ### Get all resources by team
 ```
-http://localhost:7001/nventory/v1/teams/{teamName}/applications/resources
-Ex: http://localhost:7001/nventory/v1/teams/Platform/applications/resources
+http://localhost:7001/nventory/v1/resources/teams/{teamName}/applications
+Ex: http://localhost:7001/nventory/v1/resources/teams/Platform/applications
+```
+
+### Get all resources
+```
+http://localhost:7001/nventory/v1/resources/teams
+Ex: http://localhost:7001/nventory/v1/resources/teams
 ```
 
 ### Load data using file

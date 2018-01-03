@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import ops.inventory.dao.model.Application;
 import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
+import ops.inventory.service.ApplicationResourcesByTeamResponse;
 import ops.inventory.service.ApplicationService;
 import ops.inventory.service.DiskSpaceService;
 import ops.inventory.service.HardwareResourceResponse;
@@ -104,12 +105,21 @@ public class InventoryResource {
 		inventoryService.loadDataFromFile(fileName);
 	}
 	
+	
 	@GET
-	@Path("/teams/{teamName}/applications/resources")
+	@Path("/resources/teams/{teamName}/applications")
 	@Produces(MediaType.APPLICATION_JSON)
 	public TeamApplicationsResourcesResponse getServersResourcesByTeam(@PathParam("teamName")  String teamName, @QueryParam("prodOnly") boolean prodOnly) {
 		logger.info("Fetching Servers resources by teamName {}" , teamName);
-		return inventoryService.getTeamAppResources(teamName);
+		return inventoryService.getTeamAppResources(teamName, prodOnly);
+	}
+	
+	@GET
+	@Path("/resources/teams")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ApplicationResourcesByTeamResponse getAllServersResourcesByTeam(@QueryParam("prodOnly") boolean prodOnly) {
+		logger.info("Fetching Servers resources for all teams");
+		return inventoryService.getAllAppResources(prodOnly);
 	}
 	
 	@POST

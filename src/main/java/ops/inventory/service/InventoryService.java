@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import ops.inventory.dao.ApplicationRepository;
@@ -66,16 +67,12 @@ public class InventoryService {
 	private InventoryRecordsFileReader reader;
 
 	public static final String DEFAULT_DEPT_NAME = "Technology";
+	
+	@Value("${server.hardware.unit.cost}")
+	private Integer SERVER_HARDWARE_UNIT_COST;
 
 	public List<Team> getAllTeams() {
-		List<Team> teams = new ArrayList<>();
-		Iterable<Team> ite = teamRepository.findAll();
-		if (ite != null) {
-			ite.iterator().forEachRemaining(a -> {
-				teams.add(a);
-			});
-		}
-		return teams;
+		return teamRepository.getAllTeams();
 	}
 
 	public List<Application> getAllApplicationsByTeam(String teamName) {
@@ -92,24 +89,27 @@ public class InventoryService {
 		List<Server> servers = serverRepository.getServersForApplication(applicationName);
 
 		if (servers != null) {
-			servers.stream().forEach(a -> {
-				// List<AllocatedCpu> cpus = a.getAllocatedCPU();
-				Hardware hardware = a.getHardware();
-				if (hardware != null) {
-					logger.debug("Allocated CPU {}", hardware.getCpuCores());
+			return servers.stream().filter(s -> {
+				if(!onlyProd) {
+					return true;
 				}
-			});
+				if("PROD".equalsIgnoreCase(s.getEnvironment())) {
+					return true;
+				}
+				return false;
+			}).collect(Collectors.toList());
+		} else {
+			return new ArrayList<Server>();
 		}
-		return servers;
 	}
-
-	public TeamApplicationsResourcesResponse getTeamAppResources(String teamName) {
+	
+	public TeamApplicationsResourcesResponse getTeamAppResources(String teamName, boolean prodOnly) {
 		TeamApplicationsResourcesResponse response = new TeamApplicationsResourcesResponse();
 		List<Application> applications = getAllApplicationsByTeam(teamName);
 		List<ApplicationResourcesResponse> applicationResources = new ArrayList<ApplicationResourcesResponse>();
 
 		for (Application app : applications) {
-			List<ServerResourcesResponse> serverResources = buildServerResourcesResponse(app);
+			List<ServerResourcesResponse> serverResources = buildServerResourcesResponse(app, prodOnly);
 			ApplicationResourcesResponse appResourceResponse = new ApplicationResourcesResponse();
 			appResourceResponse.setApplicationName(app.getName());
 			appResourceResponse.setServerResources(serverResources);
@@ -120,9 +120,37 @@ public class InventoryService {
 
 		return calculateAggregates(response);
 	}
+	
+	public ApplicationResourcesByTeamResponse getAllAppResources(boolean prodOnly) {
+		ApplicationResourcesByTeamResponse appResponse = new ApplicationResourcesByTeamResponse();
+		
+		List<Team> teams = getAllTeams();
+		for(Team team: teams) {
+			TeamApplicationsResourcesResponse response = new TeamApplicationsResourcesResponse();
+			List<Application> applications = getAllApplicationsByTeam(team.getName());
+			List<ApplicationResourcesResponse> applicationResources = new ArrayList<ApplicationResourcesResponse>();
 
-	private List<ServerResourcesResponse> buildServerResourcesResponse(Application app) {
-		List<Server> servers = getAllServersByApplication(app.getName(), false);
+			for (Application app : applications) {
+				List<ServerResourcesResponse> serverResources = buildServerResourcesResponse(app, prodOnly);
+				ApplicationResourcesResponse appResourceResponse = new ApplicationResourcesResponse();
+				appResourceResponse.setApplicationName(app.getName());
+				appResourceResponse.setServerResources(serverResources);
+				applicationResources.add(appResourceResponse);
+			}
+			response.setApplicationResources(applicationResources);
+			response.setTeamName(team.getName());
+			calculateAggregates(response);
+			appResponse.addApplicationResources(response);
+			appResponse.addTotalCost(response.getTotalCost());
+
+		}
+		
+		return appResponse;
+	}
+
+
+	private List<ServerResourcesResponse> buildServerResourcesResponse(Application app, boolean prodOnly) {
+		List<Server> servers = getAllServersByApplication(app.getName(), prodOnly);
 		return servers.stream().map(a -> mapToServerResponse(a)).collect(Collectors.toList());
 	}
 
@@ -154,7 +182,7 @@ public class InventoryService {
 		response.addCPUCores(arr.getTotalCores());
 		response.addDiskSpace(arr.getTotalDiskSpaceInGB());
 		response.addMemory(arr.getTotalMemoryInGB());
-		response.setTotalCost(arr.getTotalCost());
+		response.addCost(arr.getTotalCost());
 		return arr;
 	}
 
@@ -173,7 +201,13 @@ public class InventoryService {
 		// response.setOperatingSystem(s.getOperatingSystem().getName());
 		response.setServerName(s.getName());
 		response.setTotalCores(hardware.getCpuCores());
-		response.setCost(s.getCost());
+		//response.setCost(s.getCost());
+		if(s.getCost() > 0 ) {
+			response.setCost(s.getCost());
+		} else {
+			response.setCost(estimateServerCost(s));
+		}
+		
 		return response;
 	}
 
@@ -183,6 +217,10 @@ public class InventoryService {
 
 	public Application getApplication(String name) {
 		return appRepository.findByName(name);
+	}
+	
+	public List<Application> getAllApplications() {
+		return appRepository.getAllApplications();
 	}
 
 	public int updateApplicationWitCost(String name, float cost) {
@@ -318,6 +356,19 @@ public class InventoryService {
 		}
 
 		return hardwareResponse;
+	}
+	
+	private float estimateServerCost(Server s) {
+		return SERVER_HARDWARE_UNIT_COST * creditUnits(s.getHardware());
+	}
+	
+	private int creditUnits(Hardware hardware) {
+		
+		if (hardware.getCpuCores() > hardware.getMemoryInGB()) {
+			return Float.valueOf(hardware.getCpuCores()).intValue();
+		}
+		
+		return Float.valueOf(hardware.getMemoryInGB()).intValue();
 	}
 
 }

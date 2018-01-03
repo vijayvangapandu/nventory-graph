@@ -72,14 +72,7 @@ public class InventoryService {
 	private Integer SERVER_HARDWARE_UNIT_COST;
 
 	public List<Team> getAllTeams() {
-		List<Team> teams = new ArrayList<>();
-		Iterable<Team> ite = teamRepository.findAll();
-		if (ite != null) {
-			ite.iterator().forEachRemaining(a -> {
-				teams.add(a);
-			});
-		}
-		return teams;
+		return teamRepository.getAllTeams();
 	}
 
 	public List<Application> getAllApplicationsByTeam(String teamName) {
@@ -224,6 +217,10 @@ public class InventoryService {
 
 	public Application getApplication(String name) {
 		return appRepository.findByName(name);
+	}
+	
+	public List<Application> getAllApplications() {
+		return appRepository.getAllApplications();
 	}
 
 	public int updateApplicationWitCost(String name, float cost) {

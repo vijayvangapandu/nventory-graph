@@ -91,11 +91,35 @@ public class InventoryResource {
 	}
 	
 	@GET
+	@Path("/applications")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Application> getAllApplications() {
+		logger.info("Fetching all applications info ");
+		return inventoryService.getAllApplications();
+	}
+	
+	@GET
 	@Path("/applications/{appName}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Application getApplicationByName(@PathParam("appName")  String appName) {
 		logger.info("Fetching application info with name {}" , appName);
 		return inventoryService.getApplication(appName);
+	}
+	
+	@GET
+	@Path("/resources/team/{teamName}/applications")
+	@Produces(MediaType.APPLICATION_JSON)
+	public TeamApplicationsResourcesResponse getServersResourcesByTeam(@PathParam("teamName")  String teamName, @QueryParam("prodOnly") boolean prodOnly) {
+		logger.info("Fetching Servers resources by teamName {}" , teamName);
+		return inventoryService.getTeamAppResources(teamName, prodOnly);
+	}
+	
+	@GET
+	@Path("/resources")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ApplicationResourcesByTeamResponse getAllServersResourcesByTeam(@QueryParam("prodOnly") boolean prodOnly) {
+		logger.info("Fetching Servers resources for all teams");
+		return inventoryService.getAllAppResources(prodOnly);
 	}
 	
 	@POST
@@ -105,22 +129,6 @@ public class InventoryResource {
 		inventoryService.loadDataFromFile(fileName);
 	}
 	
-	
-	@GET
-	@Path("/resources/teams/{teamName}/applications")
-	@Produces(MediaType.APPLICATION_JSON)
-	public TeamApplicationsResourcesResponse getServersResourcesByTeam(@PathParam("teamName")  String teamName, @QueryParam("prodOnly") boolean prodOnly) {
-		logger.info("Fetching Servers resources by teamName {}" , teamName);
-		return inventoryService.getTeamAppResources(teamName, prodOnly);
-	}
-	
-	@GET
-	@Path("/resources/teams")
-	@Produces(MediaType.APPLICATION_JSON)
-	public ApplicationResourcesByTeamResponse getAllServersResourcesByTeam(@QueryParam("prodOnly") boolean prodOnly) {
-		logger.info("Fetching Servers resources for all teams");
-		return inventoryService.getAllAppResources(prodOnly);
-	}
 	
 	@POST
 	@Path("/applications/{appName}/costByServer/{cost}")

@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>com.vvangapandu</groupId>
 	<artifactId>ops-inventory-graph</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version>
 	<name>Operations Inventory</name>
 	<packaging>war</packaging>
 

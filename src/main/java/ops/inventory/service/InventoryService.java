@@ -16,20 +16,14 @@ import org.springframework.stereotype.Service;
 
 import ops.inventory.dao.ApplicationRepository;
 import ops.inventory.dao.DepartmentRepository;
-import ops.inventory.dao.DiskSpaceRepository;
 import ops.inventory.dao.HardwareRepository;
-import ops.inventory.dao.MemoryRepository;
 import ops.inventory.dao.OperatingSystemRepository;
-import ops.inventory.dao.ProcessorRepository;
 import ops.inventory.dao.ServerRepository;
 import ops.inventory.dao.TeamRepository;
 import ops.inventory.dao.model.Application;
 import ops.inventory.dao.model.Department;
-import ops.inventory.dao.model.DiskSpace;
 import ops.inventory.dao.model.Hardware;
-import ops.inventory.dao.model.Memory;
 import ops.inventory.dao.model.OperatingSystem;
-import ops.inventory.dao.model.Processor;
 import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.rest.ServerSaveRequest;
@@ -41,12 +35,6 @@ public class InventoryService {
 
 	@Autowired
 	private ApplicationRepository appRepository;
-	@Autowired
-	private DiskSpaceRepository diskSpaceRepository;
-	@Autowired
-	private MemoryRepository memoryRepository;
-	@Autowired
-	private ProcessorRepository processorRepository;
 	@Autowired
 	private ServerRepository serverRepository;
 	@Autowired
@@ -246,18 +234,6 @@ public class InventoryService {
 		return teamRepository.findByName(name);
 	}
 
-	public Memory getMemory(String name) {
-		return memoryRepository.findByName(name);
-	}
-
-	public DiskSpace getDiskSpace(String name) {
-		return diskSpaceRepository.findByName(name);
-	}
-
-	public Processor getProcessor(String name) {
-		return processorRepository.findByName(name);
-	}
-
 	public OperatingSystem getOperatingSystem(String name) {
 		return osRepository.findByName(name);
 	}
@@ -294,7 +270,8 @@ public class InventoryService {
 		hardware.setName("HARDWARE" + "-" + server.getName());
 		server.allocatedHardware(hardware);
 		server.setModel(serverSaveRequest.getModel());
-
+		server.setComponentType(serverSaveRequest.getComponentType());
+		
 		OperatingSystem os = server.getOperatingSystem();
 
 		if (os == null) {

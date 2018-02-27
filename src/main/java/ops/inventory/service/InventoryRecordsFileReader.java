@@ -95,12 +95,20 @@ public class InventoryRecordsFileReader {
 				case 11:
 					request.setDiskSpaceInGB((StringUtils.isNotBlank(value)) ? Float.valueOf(value) : 0);
 					break;
-				case 13:
+				case 12:
 					request.setCost((StringUtils.isNotBlank(value)) ? Float.valueOf(value) : 0);
+					break;
+				case 13:
+					request.setComponentType(value);
 					break;
 				}
 			}
+			
 			if (!badRow) {
+				if(StringUtils.isEmpty(request.getServerName())) {
+					logger.info("No servername, exiting loop...  ");
+					break;
+				}
 				request.setDataCenter(getDataCenter(request));
 				request.setEnvironment(getEnvironment(request));
 				serverRequestsList.add(request);

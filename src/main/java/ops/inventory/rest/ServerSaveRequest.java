@@ -17,7 +17,14 @@ public class ServerSaveRequest {
 	private String dataCenter;
 	private String kernalRelease;
 	private float cost;
+	private String componentType;
 	
+	public String getComponentType() {
+		return componentType;
+	}
+	public void setComponentType(String componentType) {
+		this.componentType = componentType;
+	}
 	public String getServerName() {
 		return serverName;
 	}

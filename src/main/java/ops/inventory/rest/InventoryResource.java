@@ -21,11 +21,8 @@ import ops.inventory.dao.model.Server;
 import ops.inventory.dao.model.Team;
 import ops.inventory.service.ApplicationResourcesByTeamResponse;
 import ops.inventory.service.ApplicationService;
-import ops.inventory.service.DiskSpaceService;
 import ops.inventory.service.HardwareResourceResponse;
 import ops.inventory.service.InventoryService;
-import ops.inventory.service.MemoryService;
-import ops.inventory.service.ProcessorService;
 import ops.inventory.service.ServerService;
 import ops.inventory.service.TeamApplicationsResourcesResponse;
 import ops.inventory.service.TeamService;
@@ -40,21 +37,14 @@ public class InventoryResource {
 	final ServerService serverService;
 	final ApplicationService applicationService;
 	final TeamService teamService;
-	final MemoryService memoryService;
-	final ProcessorService processorService;
-	final DiskSpaceService diskSpaceService;
 	final InventoryService inventoryService;
 	
 
 	@Autowired
-	public InventoryResource(ServerService serverService, ApplicationService applicationService, TeamService teamService, MemoryService memoryService,
-			ProcessorService processorService, DiskSpaceService diskSpaceService, InventoryService inventoryService) {
+	public InventoryResource(ServerService serverService, ApplicationService applicationService, TeamService teamService, InventoryService inventoryService) {
 		this.serverService = serverService;
 		this.applicationService = applicationService;
 		this.teamService = teamService;
-		this.memoryService = memoryService;
-		this.processorService = processorService;
-		this.diskSpaceService = diskSpaceService;
 		this.inventoryService = inventoryService;
 	}
 	

@@ -24,6 +24,7 @@ public class Server {
 	private String kernalVersion;
 	private String model;
 	private float cost;
+	private String componentType;
 
 	@Relationship(type = "NODE_OF", direction = Relationship.INCOMING)
 	private List<Application> applications = new ArrayList<>();
@@ -157,4 +158,11 @@ public class Server {
 		this.cost = cost;
 	}
 
+	public String getComponentType() {
+		return componentType;
+	}
+
+	public void setComponentType(String componentType) {
+		this.componentType = componentType;
+	}
 }

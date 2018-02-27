@@ -26,18 +26,11 @@ public class Application {
 	@Relationship(type = "OWNS", direction = "INCOMING")
 	private Set<Team> teams = new HashSet<>();
 	
-	//@Relationship(type = "NODE_OF", direction = Relationship.OUTGOING)
-	//private List<ApplicationServerLink> appServerLinks = new ArrayList<>();
+
 	@Relationship(type = "NODE_OF")
 	private List<Server> servers = new ArrayList<>();
 	
-	/*public ApplicationServerLink nodeOf(Server server) {
-        final ApplicationServerLink link = new ApplicationServerLink(this, server);
-        appServerLinks.add(link);
-        server.addApplicationServerLink(link);
-        return link;
-    }
-*/
+
 	public void addServer(Server server) {
 		servers.add(server);
 		server.addApplication(this);
@@ -92,7 +85,7 @@ public class Application {
 		this.teams = teams;
 	}
 
-	//@Relationship(type = "OWNS", direction = "INCOMING")
+	
 	public Set<Team> getTeams() {
 		return teams;
 	}

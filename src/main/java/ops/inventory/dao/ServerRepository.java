@@ -8,9 +8,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import ops.inventory.dao.model.AllocatedCpu;
-import ops.inventory.dao.model.AllocatedDiskSpace;
-import ops.inventory.dao.model.AllocatedMemory;
 import ops.inventory.dao.model.Server;
 
 
@@ -26,16 +23,6 @@ public interface ServerRepository extends PagingAndSortingRepository<Server, Lon
 	
 	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[ah]-(h) WHERE a.name = {0} RETURN a,r,s,ah,h")
 	List<Server> getServersForApplication(String name);
-	
-	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[m:ALLOCATED_MEMORY]-() WHERE a.name = {0} RETURN m ")
-	List<AllocatedMemory> getServersMemoryByApplication( String name);
-	
-	@Query("MATCH (a:Application{id: {0}})-[r:NODE_OF]-(s:Server)-[c:ALLOCATED_CPU]-() RETURN c ")
-	//List<AllocatedCpu> getServersCPUByApplication(@Param(value="name") String name);
-	List<AllocatedCpu> getServersCPUByApplication(long id);
-	
-	@Query("MATCH (a:Application)-[r:NODE_OF]-(s:Server)-[d: ALLOCATED_DISK]-() WHERE a.name = {0} RETURN d ")
-	List<AllocatedDiskSpace> getServersDiskSpaceByApplication(String name);
 	
 }
 
